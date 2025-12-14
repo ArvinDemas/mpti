@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Mahasiswa - UPN "Veteran" Yogyakarta</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#15803d',       
+                        primaryDark: '#14532d',   
+                        primaryLight: '#dcfce7',  
+                        accent: '#ca8a04',        
+                        accentLight: '#fef9c3',   
+                        secondary: '#64748B',     
+                        bgInput: '#F3F4F6',
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* CSS KHUSUS HALAMAN LOGIN (BAWAAN ANDA) */
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .radio-card:checked + div { border-color: #15803d; background-color: #f0fdf4; color: #14532d; box-shadow: 0 4px 6px -1px rgba(21, 128, 61, 0.15); }
+        .radio-card:checked + div .check-icon { opacity: 1; transform: scale(1); color: #ca8a04; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800"> 
+
+    <div id="login-container" class="min-h-screen flex items-center justify-center p-4 md:p-8 bg-slate-100">
+        <div class="bg-white w-full max-w-6xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[650px]">
+            
+            <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center relative">
+                <div class="w-full max-w-md mx-auto">
+                    
+                    <div id="view-login" class="fade-in">
+                        <div class="text-center mb-10">
+                            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">Portal Terintegrasi</h1>
+                            <h2 class="text-lg font-semibold text-primary mb-3">UPN "Veteran" Yogyakarta</h2>
+                            <div class="flex justify-center gap-2 text-[10px] font-bold tracking-widest uppercase text-slate-400">
+                                <span>BIMA</span>•<span>SPADA</span>•<span>SADEWA</span>•<span>NAKULA</span>
+                            </div>
+                        </div>
+
+                        <form onsubmit="handleLogin(event)" class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-2">Username (NIM)</label>
+                                <input type="text" id="login-username" value="124230001"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition text-gray-700 bg-bgInput"
+                                    placeholder="Masukkan NIM">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-2">Password</label>
+                                <input type="password" id="login-password" value="password"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition text-gray-700 bg-bgInput"
+                                    placeholder="Masukkan Password">
+                            </div>
+                            <button type="submit" id="btn-login"
+                                class="w-full bg-primary hover:bg-primaryDark text-white font-bold text-lg py-3.5 rounded-lg shadow-lg shadow-green-200 transition duration-300 mt-4 flex items-center justify-center gap-2 group">
+                                LOGIN <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition"></i>
+                            </button>
+                        </form>
+
+                        <div class="flex justify-between items-center mt-8 text-sm font-medium text-gray-500">
+                            <button onclick="showToast('Info', 'Fitur belum aktif')" class="hover:text-primary transition">Aktivasi Akun</button>
+                            <button onclick="showToast('Info', 'Fitur belum aktif')" class="hover:text-primary transition">Lupa Password?</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hidden md:flex w-1/2 bg-gradient-to-br from-green-800 via-primary to-yellow-600 relative flex-col justify-center p-12 lg:p-20 text-white overflow-hidden">
+                <div class="relative z-10 space-y-8">
+                    <div>
+                        <h1 class="text-4xl font-bold leading-tight tracking-tight mb-2 text-white">Selamat Datang di SEMAR</h1>
+                        <h2 class="text-lg font-medium text-yellow-200 opacity-90">Single Entry Multi Access Resource</h2>
+                    </div>
+                    <div class="w-20 h-1.5 bg-yellow-400 rounded-full"></div>
+                    <div class="space-y-4 text-sm leading-relaxed text-green-50 font-light opacity-90">
+                        <p>Satu akun untuk mengakses seluruh layanan akademik dan kemahasiswaan Kampus Bela Negara.</p>
+                        <div class="flex gap-3 mt-4">
+                            <div class="bg-white/10 backdrop-blur-sm px-3 py-2 rounded border border-white/20"><span class="text-xs font-semibold">Terintegrasi</span></div>
+                            <div class="bg-white/10 backdrop-blur-sm px-3 py-2 rounded border border-white/20"><span class="text-xs font-semibold">Cepat</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="hidden flex h-screen overflow-hidden bg-gray-100">
+        
+        <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 text-gray-700 flex flex-col transition-all duration-300 transform translate-x-0 z-30 fixed md:relative h-full">
+            <div class="p-6 bg-green-50 border-b border-green-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-green-900 rounded-full flex items-center justify-center text-white font-bold shadow-sm">A</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold truncate text-gray-900" id="sidebar-username">User</p>
+                        <p class="text-xs text-primary font-medium" id="sidebar-role">Mahasiswa</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex-1 py-4 overflow-y-auto space-y-1 px-3" id="nav-links"></nav>
+        </aside>
+
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <header class="md:hidden bg-white border-b p-4 flex justify-between items-center z-20">
+                <button onclick="toggleSidebar()" class="p-2"><i data-lucide="menu"></i></button>
+                <h1 class="font-bold text-lg text-primary">SEMAR</h1>
+            </header>
+            <main id="main-content" class="flex-1 overflow-y-auto bg-gray-100 p-4 md:p-8 relative"></main>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-5 right-5 bg-white border-l-4 border-primary text-gray-800 px-6 py-4 rounded-lg shadow-2xl transform translate-x-full transition-transform duration-300 z-[60] flex items-center gap-4 min-w-[300px]">
+        <div id="toast-icon" class="text-primary"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
+        <div><h4 class="font-bold text-sm" id="toast-title">Pesan</h4><p id="toast-msg" class="text-sm text-gray-600">...</p></div>
+    </div>
+
+    <script>
+        const state = { isLoggedIn: false, currentUser: null, dashboardData: null };
+
+        // --- AUTH ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login');
+            btn.innerText = "Loading..."; btn.disabled = true;
+
+            const nim = document.getElementById('login-username').value;
+            const pass = document.getElementById('login-password').value;
+
+            try {
+                // Panggil API Login
+                const res = await fetch('api/login.php', { method:'POST', body:JSON.stringify({username:nim, password:pass}) });
+                const d = await res.json();
+
+                if(d.status === 'success') {
+                    state.currentUser = d.data;
+                    await loadData();
+                    
+                    // Switch Tampilan
+                    document.getElementById('login-container').classList.add('hidden');
+                    document.getElementById('app-container').classList.remove('hidden');
+                    
+                    initDashboardUI();
+                    showToast('Sukses', 'Login Berhasil!');
+                } else {
+                    showToast('Gagal', d.message, true);
+                }
+            } catch(err) { showToast('Error', 'Gagal koneksi ke Database', true); }
+            finally { btn.innerText = "LOGIN"; btn.disabled = false; }
+        }
+
+        async function loadData() {
+            // Hanya handle Mahasiswa dulu sesuai request
+            if(state.currentUser.role === 'mahasiswa') {
+                const res = await fetch('api/get_dashboard_mhs.php');
+                const d = await res.json();
+                state.dashboardData = d.data;
+            }
+        }
+
+        function initDashboardUI() {
+            document.getElementById('sidebar-username').innerText = state.currentUser.name;
+            document.getElementById('sidebar-role').innerText = state.currentUser.role;
+            renderMhsDashboard();
+            lucide.createIcons();
+        }
+
+        // --- RENDERER DASHBOARD MAHASISWA ---
+        function renderMhsDashboard() {
+            const d = state.dashboardData;
+            const content = document.getElementById('main-content');
+            
+            let html = `<div class="max-w-6xl mx-auto space-y-6 fade-in">
+                <div class="bg-gradient-to-r from-green-700 to-green-900 rounded-2xl p-8 text-white shadow-lg">
+                    <h2 class="text-3xl font-bold">Halo, ${state.currentUser.name}</h2>
+                    <p class="opacity-90">${state.currentUser.major} • ${state.currentUser.username}</p>
+                </div>`;
+
+            // Jadwal & Presensi
+            html += `<div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-green-600">
+                    <h3 class="font-bold text-xl mb-4">Jadwal & Presensi</h3>`;
+            
+            if(d.schedule.length > 0) {
+                d.schedule.forEach(c => {
+                    // Logic Tombol Cerdas
+                    const isPresent = parseInt(c.is_present) > 0;
+                    const btn = isPresent 
+                        ? `<button disabled class="w-full bg-green-100 text-green-800 py-2 rounded font-bold mt-2 cursor-not-allowed">✅ Hadir (${c.present_time})</button>`
+                        : `<button onclick="doAction('presensi', ${c.id})" class="w-full bg-green-600 text-white py-2 rounded font-bold mt-2 hover:bg-green-700 transition">Klik Presensi</button>`;
+                    
+                    html += `<div class="border p-4 rounded mb-2">
+                        <div class="flex justify-between font-bold"><span>${c.name}</span><span>${c.time_start}</span></div>
+                        <p class="text-sm text-gray-500 mb-1">R. ${c.room}</p>
+                        ${btn}
+                    </div>`;
+                });
+            } else { html += `<p class="text-gray-500">Tidak ada jadwal hari ini.</p>`; }
+            html += `</div>`;
+
+            // Tugas
+            html += `<div class="bg-white p-6 rounded-xl shadow border-t-4 border-yellow-500">
+                <h3 class="font-bold text-xl mb-4">Tugas Kuliah</h3>`;
+            
+            if(d.tasks.length > 0) {
+                d.tasks.forEach(t => {
+                    const isSubmitted = t.submitted_at != null;
+                    const status = isSubmitted 
+                        ? `<div class="bg-green-50 text-green-700 p-2 rounded text-sm font-bold mt-2">✅ Terkirim: ${t.submitted_at}</div>`
+                        : `<form onsubmit="doUpload(event, ${t.id})" class="flex gap-2 mt-2"><input type="file" required class="text-sm border rounded flex-1"><button class="bg-blue-600 text-white px-3 rounded text-sm hover:bg-blue-700">Upload</button></form>`;
+                    
+                    html += `<div class="border p-4 rounded mb-2">
+                        <h4 class="font-bold">${t.title}</h4>
+                        <p class="text-xs text-gray-500">Deadline: ${t.deadline}</p>
+                        ${status}
+                    </div>`;
+                });
+            } else { html += `<p class="text-gray-500">Tidak ada tugas aktif.</p>`; }
+            html += `</div></div>`;
+
+            // Sanggah UKT
+            html += `<div class="bg-white p-6 rounded-xl shadow border-t-4 border-red-500">
+                <h3 class="font-bold text-xl mb-4">Layanan Sanggah UKT</h3>
+                <div class="flex gap-2 mb-4">
+                    <input id="ukt-alasan" class="border p-2 rounded flex-1" placeholder="Masukkan alasan sanggah...">
+                    <button onclick="doAction('sanggah_ukt')" class="bg-red-600 text-white px-4 rounded font-bold hover:bg-red-700">Kirim</button>
+                </div>
+                <div class="space-y-2">`;
+                
+            d.appeals.forEach(a => {
+                let color = a.status === 'Disetujui' ? 'text-green-600' : 'text-yellow-600';
+                html += `<div class="border-b p-2 flex justify-between"><span>${a.request_date}: ${a.description}</span><span class="font-bold ${color}">${a.status}</span></div>`;
+            });
+            html += `</div></div></div>`;
+
+            content.innerHTML = html;
+        }
+
+        // --- ACTIONS ---
+        async function doAction(type, id=null) {
+            const fd = new FormData();
+            fd.append('action', type);
+            if(type==='presensi') fd.append('course_id', id);
+            if(type==='sanggah_ukt') {
+                const val = document.getElementById('ukt-alasan').value;
+                if(!val) return showToast('Error', 'Isi alasan!', true);
+                fd.append('desc', val);
+            }
+
+            try {
+                const res = await fetch('api/action_mhs.php', {method:'POST', body:fd});
+                const d = await res.json();
+                showToast(d.status==='success'?'Sukses':'Gagal', d.message, d.status!=='success');
+                if(d.status==='success') {
+                    await loadData(); // Refresh Data
+                    renderMhsDashboard(); // Re-render UI
+                }
+            } catch(e) { showToast('Error', 'Gagal memproses', true); }
+        }
+
+        async function doUpload(e, id) {
+            e.preventDefault();
+            const file = e.target.querySelector('input').files[0];
+            const fd = new FormData();
+            fd.append('action', 'upload_tugas');
+            fd.append('assignment_id', id);
+            fd.append('file', file);
+
+            try {
+                const res = await fetch('api/action_mhs.php', {method:'POST', body:fd});
+                const d = await res.json();
+                showToast(d.status==='success'?'Sukses':'Gagal', d.message, d.status!=='success');
+                if(d.status==='success') { await loadData(); renderMhsDashboard(); }
+            } catch(e) { showToast('Error', 'Gagal upload', true); }
+        }
+
+        // --- UTILS ---
+        function showToast(title, msg, err=false) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            t.className = `fixed top-5 right-5 border-l-4 p-4 rounded shadow-xl transition transform z-50 min-w-[300px] bg-white ${err ? 'border-red-500' : 'border-green-500'} translate-x-0`;
+            setTimeout(() => t.classList.add('translate-x-full'), 3000);
+        }
+        function toggleSidebar() { /* Logic toggle sederhana */ }
+        lucide.createIcons();
+    </script>
+</body>
+</html>
