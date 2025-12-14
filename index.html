@@ -29,7 +29,6 @@
     </script>
 
     <style>
-        /* CSS KHUSUS HALAMAN LOGIN (BAWAAN ANDA) */
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -37,8 +36,9 @@
         .radio-card:checked + div .check-icon { opacity: 1; transform: scale(1); color: #ca8a04; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans text-gray-800"> 
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800">
 
+    <!-- LOGIN SCREEN -->
     <div id="login-container" class="min-h-screen flex items-center justify-center p-4 md:p-8 bg-slate-100">
         <div class="bg-white w-full max-w-6xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[650px]">
             
@@ -56,14 +56,14 @@
 
                         <form onsubmit="handleLogin(event)" class="space-y-6">
                             <div>
-                                <label class="block text-sm font-bold text-slate-600 mb-2">Username (NIM)</label>
+                                <label class="block text-sm font-bold text-slate-600 mb-2">Username (NIM/NIK)</label>
                                 <input type="text" id="login-username" value="124230001"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition text-gray-700 bg-bgInput"
-                                    placeholder="Masukkan NIM">
+                                    placeholder="Masukkan Username">
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-600 mb-2">Password</label>
-                                <input type="password" id="login-password" value="password"
+                                <input type="text" id="login-password" value="password"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition text-gray-700 bg-bgInput"
                                     placeholder="Masukkan Password">
                             </div>
@@ -74,14 +74,24 @@
                         </form>
 
                         <div class="flex justify-between items-center mt-8 text-sm font-medium text-gray-500">
-                            <button onclick="showToast('Info', 'Fitur belum aktif')" class="hover:text-primary transition">Aktivasi Akun</button>
-                            <button onclick="showToast('Info', 'Fitur belum aktif')" class="hover:text-primary transition">Lupa Password?</button>
+                            <button onclick="showToast('Info', 'Hubungi admin untuk aktivasi akun')" class="hover:text-primary transition">Aktivasi Akun</button>
+                            <button onclick="showToast('Info', 'Hubungi admin untuk reset password')" class="hover:text-primary transition">Lupa Password?</button>
+                        </div>
+                        
+                        <!-- DEBUG INFO -->
+                        <div id="debug-info" class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-xs">
+                            <p class="font-bold text-gray-700 mb-2">🔍 Debug Info:</p>
+                            <p class="text-gray-600">Status: <span id="debug-status" class="font-mono text-red-600">Belum login</span></p>
+                            <p class="text-gray-600 mt-1">Response: <span id="debug-response" class="font-mono">-</span></p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="hidden md:flex w-1/2 bg-gradient-to-br from-green-800 via-primary to-yellow-600 relative flex-col justify-center p-12 lg:p-20 text-white overflow-hidden">
+                <div class="absolute inset-0 z-0">
+                    <img src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1986&auto=format&fit=crop" alt="Kampus" class="w-full h-full object-cover opacity-30 mix-blend-multiply">
+                </div>
                 <div class="relative z-10 space-y-8">
                     <div>
                         <h1 class="text-4xl font-bold leading-tight tracking-tight mb-2 text-white">Selamat Datang di SEMAR</h1>
@@ -91,8 +101,14 @@
                     <div class="space-y-4 text-sm leading-relaxed text-green-50 font-light opacity-90">
                         <p>Satu akun untuk mengakses seluruh layanan akademik dan kemahasiswaan Kampus Bela Negara.</p>
                         <div class="flex gap-3 mt-4">
-                            <div class="bg-white/10 backdrop-blur-sm px-3 py-2 rounded border border-white/20"><span class="text-xs font-semibold">Terintegrasi</span></div>
-                            <div class="bg-white/10 backdrop-blur-sm px-3 py-2 rounded border border-white/20"><span class="text-xs font-semibold">Cepat</span></div>
+                            <div class="bg-white/10 backdrop-blur-sm px-3 py-2 rounded border border-white/20">
+                                <i data-lucide="shield-check" class="w-6 h-6 text-yellow-300 mb-1"></i>
+                                <span class="text-xs font-semibold">Terintegrasi</span>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm px-3 py-2 rounded border border-white/20">
+                                <i data-lucide="zap" class="w-6 h-6 text-yellow-300 mb-1"></i>
+                                <span class="text-xs font-semibold">Cepat</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -100,203 +116,757 @@
         </div>
     </div>
 
+    <!-- APP CONTAINER -->
     <div id="app-container" class="hidden flex h-screen overflow-hidden bg-gray-100">
         
         <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 text-gray-700 flex flex-col transition-all duration-300 transform translate-x-0 z-30 fixed md:relative h-full">
             <div class="p-6 bg-green-50 border-b border-green-100">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-green-900 rounded-full flex items-center justify-center text-white font-bold shadow-sm">A</div>
+                    <div class="w-10 h-10 bg-green-900 rounded-full flex items-center justify-center text-white font-bold shadow-sm ring-2 ring-gray-200 ring-offset-2" id="avatar">A</div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-bold truncate text-gray-900" id="sidebar-username">User</p>
-                        <p class="text-xs text-primary font-medium" id="sidebar-role">Mahasiswa</p>
+                        <p class="text-xs text-primary font-medium" id="sidebar-role">Loading...</p>
                     </div>
                 </div>
             </div>
             <nav class="flex-1 py-4 overflow-y-auto space-y-1 px-3" id="nav-links"></nav>
+            <div class="p-4 border-t">
+                <button onclick="handleLogout()" class="w-full bg-red-50 text-red-600 hover:bg-red-100 py-2 px-4 rounded-lg font-bold transition flex items-center justify-center gap-2">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+                </button>
+            </div>
         </aside>
 
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             <header class="md:hidden bg-white border-b p-4 flex justify-between items-center z-20">
-                <button onclick="toggleSidebar()" class="p-2"><i data-lucide="menu"></i></button>
+                <button onclick="toggleSidebar()" class="p-2"><i data-lucide="menu" class="w-6 h-6"></i></button>
                 <h1 class="font-bold text-lg text-primary">SEMAR</h1>
+                <div class="bg-green-50 p-2 rounded-full">
+                    <i data-lucide="user" class="w-5 h-5 text-primary"></i>
+                </div>
             </header>
             <main id="main-content" class="flex-1 overflow-y-auto bg-gray-100 p-4 md:p-8 relative"></main>
         </div>
+
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden"></div>
     </div>
 
+    <!-- TOAST NOTIFICATION -->
     <div id="toast" class="fixed top-5 right-5 bg-white border-l-4 border-primary text-gray-800 px-6 py-4 rounded-lg shadow-2xl transform translate-x-full transition-transform duration-300 z-[60] flex items-center gap-4 min-w-[300px]">
         <div id="toast-icon" class="text-primary"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
         <div><h4 class="font-bold text-sm" id="toast-title">Pesan</h4><p id="toast-msg" class="text-sm text-gray-600">...</p></div>
     </div>
 
     <script>
-        const state = { isLoggedIn: false, currentUser: null, dashboardData: null };
+        const API_URL = 'api/';
+        const state = { 
+            isLoggedIn: false, 
+            currentUser: null, 
+            dashboardData: null,
+            currentPage: 'dashboard'
+        };
 
-        // --- AUTH ---
+        // ============= AUTH =============
         async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-login');
-            btn.innerText = "Loading..."; btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "Loading..."; 
+            btn.disabled = true;
 
-            const nim = document.getElementById('login-username').value;
+            const nim = document.getElementById('login-username').value.trim();
             const pass = document.getElementById('login-password').value;
 
+            // Debug display
+            document.getElementById('debug-status').innerHTML = `Mencoba login...<br>Username: ${nim}<br>Password: ${pass}`;
+            document.getElementById('debug-response').innerHTML = 'Mengirim request...';
+
             try {
-                // Panggil API Login
-                const res = await fetch('api/login.php', { method:'POST', body:JSON.stringify({username:nim, password:pass}) });
-                const d = await res.json();
+                const payload = JSON.stringify({username:nim, password:pass});
+                console.log('Sending:', payload);
+                
+                const res = await fetch(API_URL + 'login.php', { 
+                    method:'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: payload
+                });
+                
+                const responseText = await res.text();
+                console.log('Raw response:', responseText);
+                
+                // Update debug
+                document.getElementById('debug-response').innerHTML = responseText.substring(0, 200);
+                
+                const d = JSON.parse(responseText);
+                console.log('Parsed:', d);
 
                 if(d.status === 'success') {
                     state.currentUser = d.data;
+                    state.isLoggedIn = true;
+                    
+                    document.getElementById('debug-status').innerHTML = '<span class="text-green-600">✅ Login Berhasil!</span>';
+                    
                     await loadData();
                     
-                    // Switch Tampilan
                     document.getElementById('login-container').classList.add('hidden');
                     document.getElementById('app-container').classList.remove('hidden');
                     
-                    initDashboardUI();
-                    showToast('Sukses', 'Login Berhasil!');
+                    initUI();
+                    showToast('Sukses', `Selamat datang, ${state.currentUser.name}!`);
                 } else {
+                    document.getElementById('debug-status').innerHTML = '<span class="text-red-600">❌ ' + d.message + '</span>';
                     showToast('Gagal', d.message, true);
                 }
-            } catch(err) { showToast('Error', 'Gagal koneksi ke Database', true); }
-            finally { btn.innerText = "LOGIN"; btn.disabled = false; }
-        }
-
-        async function loadData() {
-            // Hanya handle Mahasiswa dulu sesuai request
-            if(state.currentUser.role === 'mahasiswa') {
-                const res = await fetch('api/get_dashboard_mhs.php');
-                const d = await res.json();
-                state.dashboardData = d.data;
+            } catch(err) { 
+                console.error('Error:', err);
+                document.getElementById('debug-status').innerHTML = '<span class="text-red-600">❌ Error: ' + err.message + '</span>';
+                showToast('Error', 'Gagal koneksi ke server: ' + err.message, true); 
+            }
+            finally { 
+                btn.innerHTML = originalText; 
+                btn.disabled = false; 
             }
         }
 
-        function initDashboardUI() {
+        async function handleLogout() {
+            if(confirm('Yakin ingin keluar?')) {
+                try {
+                    await fetch(API_URL + 'logout.php');
+                    state.isLoggedIn = false;
+                    state.currentUser = null;
+                    state.dashboardData = null;
+                    
+                    document.getElementById('app-container').classList.add('hidden');
+                    document.getElementById('login-container').classList.remove('hidden');
+                    showToast('Info', 'Anda telah keluar');
+                } catch(e) {
+                    console.error(e);
+                }
+            }
+        }
+
+        async function loadData() {
+            const role = state.currentUser.role;
+            let endpoint = '';
+            
+            if(role === 'mahasiswa') endpoint = 'get_dashboard_mhs.php';
+            else if(role === 'dosen') endpoint = 'get_dashboard_dosen.php';
+            else if(role === 'admin') endpoint = 'get_dashboard_admin.php';
+
+            try {
+                const res = await fetch(API_URL + endpoint);
+                const d = await res.json();
+                if(d.status === 'success') {
+                    state.dashboardData = d.data;
+                }
+            } catch(e) {
+                console.error('Load data error:', e);
+            }
+        }
+
+        function initUI() {
             document.getElementById('sidebar-username').innerText = state.currentUser.name;
-            document.getElementById('sidebar-role').innerText = state.currentUser.role;
-            renderMhsDashboard();
+            document.getElementById('sidebar-role').innerText = state.currentUser.role.toUpperCase();
+            document.getElementById('avatar').innerText = state.currentUser.name.charAt(0).toUpperCase();
+            
+            renderSidebar();
+            renderPage();
             lucide.createIcons();
         }
 
-        // --- RENDERER DASHBOARD MAHASISWA ---
-        function renderMhsDashboard() {
-            const d = state.dashboardData;
-            const content = document.getElementById('main-content');
-            
-            let html = `<div class="max-w-6xl mx-auto space-y-6 fade-in">
-                <div class="bg-gradient-to-r from-green-700 to-green-900 rounded-2xl p-8 text-white shadow-lg">
-                    <h2 class="text-3xl font-bold">Halo, ${state.currentUser.name}</h2>
-                    <p class="opacity-90">${state.currentUser.major} • ${state.currentUser.username}</p>
-                </div>`;
+        function renderSidebar() {
+            const role = state.currentUser.role;
+            let items = [];
 
-            // Jadwal & Presensi
-            html += `<div class="grid md:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow border-t-4 border-green-600">
-                    <h3 class="font-bold text-xl mb-4">Jadwal & Presensi</h3>`;
-            
-            if(d.schedule.length > 0) {
-                d.schedule.forEach(c => {
-                    // Logic Tombol Cerdas
-                    const isPresent = parseInt(c.is_present) > 0;
-                    const btn = isPresent 
-                        ? `<button disabled class="w-full bg-green-100 text-green-800 py-2 rounded font-bold mt-2 cursor-not-allowed">✅ Hadir (${c.present_time})</button>`
-                        : `<button onclick="doAction('presensi', ${c.id})" class="w-full bg-green-600 text-white py-2 rounded font-bold mt-2 hover:bg-green-700 transition">Klik Presensi</button>`;
-                    
-                    html += `<div class="border p-4 rounded mb-2">
-                        <div class="flex justify-between font-bold"><span>${c.name}</span><span>${c.time_start}</span></div>
-                        <p class="text-sm text-gray-500 mb-1">R. ${c.room}</p>
-                        ${btn}
-                    </div>`;
-                });
-            } else { html += `<p class="text-gray-500">Tidak ada jadwal hari ini.</p>`; }
-            html += `</div>`;
+            if(role === 'mahasiswa') {
+                items = [
+                    { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
+                    { id: 'jadwal', label: 'Jadwal & Presensi', icon: 'calendar' },
+                    { id: 'tugas', label: 'Tugas Kuliah', icon: 'file-text' },
+                    { id: 'ukt', label: 'Sanggah UKT', icon: 'wallet' },
+                ];
+            } else if(role === 'dosen') {
+                items = [
+                    { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
+                    { id: 'kelas', label: 'Kelas Saya', icon: 'users' },
+                    { id: 'presensi', label: 'Log Presensi', icon: 'check-circle' },
+                    { id: 'tugas_dosen', label: 'Manajemen Tugas', icon: 'clipboard-list' },
+                ];
+            } else if(role === 'admin') {
+                items = [
+                    { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
+                    { id: 'sanggah', label: 'Sanggah UKT', icon: 'file-question' },
+                    { id: 'users', label: 'Manajemen User', icon: 'users' },
+                ];
+            }
 
-            // Tugas
-            html += `<div class="bg-white p-6 rounded-xl shadow border-t-4 border-yellow-500">
-                <h3 class="font-bold text-xl mb-4">Tugas Kuliah</h3>`;
-            
-            if(d.tasks.length > 0) {
-                d.tasks.forEach(t => {
-                    const isSubmitted = t.submitted_at != null;
-                    const status = isSubmitted 
-                        ? `<div class="bg-green-50 text-green-700 p-2 rounded text-sm font-bold mt-2">✅ Terkirim: ${t.submitted_at}</div>`
-                        : `<form onsubmit="doUpload(event, ${t.id})" class="flex gap-2 mt-2"><input type="file" required class="text-sm border rounded flex-1"><button class="bg-blue-600 text-white px-3 rounded text-sm hover:bg-blue-700">Upload</button></form>`;
-                    
-                    html += `<div class="border p-4 rounded mb-2">
-                        <h4 class="font-bold">${t.title}</h4>
-                        <p class="text-xs text-gray-500">Deadline: ${t.deadline}</p>
-                        ${status}
-                    </div>`;
-                });
-            } else { html += `<p class="text-gray-500">Tidak ada tugas aktif.</p>`; }
-            html += `</div></div>`;
+            const html = items.map(item => {
+                const active = state.currentPage === item.id;
+                return `<button onclick="navigateTo('${item.id}')" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${active ? 'bg-green-50 text-primary font-semibold border-r-4 border-primary' : 'text-gray-600 hover:bg-green-50 hover:text-primary'}">
+                    <i data-lucide="${item.icon}" class="w-5 h-5 ${active ? 'text-primary' : ''}"></i>
+                    <span class="text-sm">${item.label}</span>
+                </button>`;
+            }).join('');
 
-            // Sanggah UKT
-            html += `<div class="bg-white p-6 rounded-xl shadow border-t-4 border-red-500">
-                <h3 class="font-bold text-xl mb-4">Layanan Sanggah UKT</h3>
-                <div class="flex gap-2 mb-4">
-                    <input id="ukt-alasan" class="border p-2 rounded flex-1" placeholder="Masukkan alasan sanggah...">
-                    <button onclick="doAction('sanggah_ukt')" class="bg-red-600 text-white px-4 rounded font-bold hover:bg-red-700">Kirim</button>
-                </div>
-                <div class="space-y-2">`;
-                
-            d.appeals.forEach(a => {
-                let color = a.status === 'Disetujui' ? 'text-green-600' : 'text-yellow-600';
-                html += `<div class="border-b p-2 flex justify-between"><span>${a.request_date}: ${a.description}</span><span class="font-bold ${color}">${a.status}</span></div>`;
-            });
-            html += `</div></div></div>`;
-
-            content.innerHTML = html;
+            document.getElementById('nav-links').innerHTML = html;
         }
 
-        // --- ACTIONS ---
-        async function doAction(type, id=null) {
+        function navigateTo(pageId) {
+            state.currentPage = pageId;
+            renderSidebar();
+            renderPage();
+            
+            if(window.innerWidth < 768) {
+                const sidebar = document.getElementById('sidebar');
+                if(!sidebar.classList.contains('-translate-x-full')) toggleSidebar();
+            }
+        }
+
+        function renderPage() {
+            const content = document.getElementById('main-content');
+            const role = state.currentUser.role;
+            
+            content.innerHTML = '<div class="text-center py-20"><i data-lucide="loader-2" class="w-12 h-12 animate-spin mx-auto text-primary"></i></div>';
+            
+            setTimeout(() => {
+                if(role === 'mahasiswa') renderMahasiswaPage();
+                else if(role === 'dosen') renderDosenPage();
+                else if(role === 'admin') renderAdminPage();
+                lucide.createIcons();
+            }, 100);
+        }
+
+        // ============= MAHASISWA PAGES =============
+        function renderMahasiswaPage() {
+            const page = state.currentPage;
+            const content = document.getElementById('main-content');
+            
+            if(page === 'dashboard') {
+                content.innerHTML = getMahasiswaDashboard();
+            } else if(page === 'jadwal') {
+                content.innerHTML = getJadwalPage();
+            } else if(page === 'tugas') {
+                content.innerHTML = getTugasPage();
+            } else if(page === 'ukt') {
+                content.innerHTML = getUKTPage();
+            }
+        }
+
+        function getMahasiswaDashboard() {
+            const d = state.dashboardData;
+            const user = state.currentUser;
+            
+            return `<div class="max-w-6xl mx-auto space-y-6 fade-in">
+                <div class="bg-gradient-to-r from-green-700 to-green-900 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-64 h-64 bg-yellow-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
+                    <div class="relative z-10">
+                        <h2 class="text-3xl font-bold mb-2">Halo, ${user.name.split(' ')[0]}! 👋</h2>
+                        <p class="opacity-90 mb-4">${user.major} • ${user.username}</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                                <p class="text-xs text-green-100">IPK</p>
+                                <p class="text-2xl font-bold">3.85</p>
+                            </div>
+                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                                <p class="text-xs text-green-100">SKS</p>
+                                <p class="text-2xl font-bold">88</p>
+                            </div>
+                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                                <p class="text-xs text-green-100">Semester</p>
+                                <p class="text-2xl font-bold">5</p>
+                            </div>
+                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                                <p class="text-xs text-green-100">Kehadiran</p>
+                                <p class="text-2xl font-bold">92%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow border-t-4 border-green-600">
+                        <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
+                            <i data-lucide="calendar-check" class="w-5 h-5 text-green-600"></i> 
+                            Jadwal Hari Ini
+                        </h3>
+                        ${renderJadwalCards(d.schedule.slice(0, 2))}
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow border-t-4 border-yellow-500">
+                        <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
+                            <i data-lucide="clipboard-list" class="w-5 h-5 text-yellow-600"></i> 
+                            Tugas Mendatang
+                        </h3>
+                        ${renderTugasCards(d.tasks.slice(0, 2))}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function getJadwalPage() {
+            const d = state.dashboardData;
+            return `<div class="max-w-4xl mx-auto fade-in">
+                <h2 class="text-2xl font-bold mb-6">Jadwal & Presensi</h2>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    ${renderJadwalCards(d.schedule, true)}
+                </div>
+            </div>`;
+        }
+
+        function getTugasPage() {
+            const d = state.dashboardData;
+            return `<div class="max-w-4xl mx-auto fade-in">
+                <h2 class="text-2xl font-bold mb-6">Tugas Kuliah</h2>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    ${renderTugasCards(d.tasks, true)}
+                </div>
+            </div>`;
+        }
+
+        function getUKTPage() {
+            const d = state.dashboardData;
+            return `<div class="max-w-4xl mx-auto fade-in">
+                <h2 class="text-2xl font-bold mb-6">Sanggah UKT</h2>
+                
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h3 class="font-bold text-lg mb-4">Ajukan Sanggah Baru</h3>
+                    <div class="flex gap-2">
+                        <input id="ukt-alasan" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Jelaskan alasan sanggah Anda...">
+                        <button onclick="doAction('sanggah_ukt')" class="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-primaryDark transition">
+                            Kirim
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-bold text-lg mb-4">Riwayat Sanggahan</h3>
+                    ${renderSanggahList(d.appeals)}
+                </div>
+            </div>`;
+        }
+
+        function renderJadwalCards(schedule, showAll = false) {
+            if(!schedule || schedule.length === 0) {
+                return '<p class="text-gray-500 text-center py-8">Tidak ada jadwal hari ini</p>';
+            }
+            
+            return schedule.map(c => {
+                const isPresent = parseInt(c.is_present) > 0;
+                const btn = isPresent 
+                    ? `<button disabled class="w-full bg-green-100 text-green-800 py-2 rounded-lg font-bold mt-3 cursor-not-allowed flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> Hadir (${c.present_time || 'Tercatat'})
+                    </button>`
+                    : `<button onclick="doAction('presensi', ${c.id})" class="w-full bg-primary text-white py-2 rounded-lg font-bold mt-3 hover:bg-primaryDark transition flex items-center justify-center gap-2">
+                        <i data-lucide="fingerprint" class="w-4 h-4"></i> Presensi Sekarang
+                    </button>`;
+                
+                return `<div class="border border-gray-200 rounded-lg p-4 mb-3 hover:border-primary transition">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h4 class="font-bold text-lg">${c.name}</h4>
+                            <p class="text-sm text-gray-500">${c.code} • ${c.sks} SKS</p>
+                        </div>
+                        <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold">${c.time_start} - ${c.time_end}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                        <span>Ruang ${c.room}</span>
+                        <span class="text-gray-400">•</span>
+                        <span>${c.day}</span>
+                    </div>
+                    ${btn}
+                </div>`;
+            }).join('');
+        }
+
+        function renderTugasCards(tasks, showAll = false) {
+            if(!tasks || tasks.length === 0) {
+                return '<p class="text-gray-500 text-center py-8">Tidak ada tugas aktif</p>';
+            }
+            
+            return tasks.map(t => {
+                const isSubmitted = t.submitted_at != null;
+                const deadline = new Date(t.deadline);
+                const isOverdue = deadline < new Date();
+                
+                const statusDiv = isSubmitted 
+                    ? `<div class="bg-green-50 text-green-700 p-3 rounded-lg text-sm font-bold mt-3 flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> 
+                        Terkirim: ${new Date(t.submitted_at).toLocaleString('id-ID')}
+                    </div>`
+                    : `<form onsubmit="doUpload(event, ${t.id})" class="flex gap-2 mt-3">
+                        <input type="file" required class="flex-1 text-sm border rounded-lg px-3 py-2">
+                        <button type="submit" class="bg-blue-600 text-white px-4 rounded-lg text-sm hover:bg-blue-700 font-bold">
+                            Upload
+                        </button>
+                    </form>`;
+                
+                return `<div class="border border-gray-200 rounded-lg p-4 mb-3 hover:border-primary transition ${isOverdue && !isSubmitted ? 'border-l-4 border-l-red-500' : ''}">
+                    <h4 class="font-bold text-lg mb-1">${t.title}</h4>
+                    <p class="text-sm text-gray-500 mb-1">${t.course_name || 'Mata Kuliah'}</p>
+                    <div class="flex items-center gap-2 text-sm ${isOverdue && !isSubmitted ? 'text-red-600' : 'text-gray-600'}">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                        <span>Deadline: ${deadline.toLocaleString('id-ID', {dateStyle: 'medium', timeStyle: 'short'})}</span>
+                    </div>
+                    ${statusDiv}
+                </div>`;
+            }).join('');
+        }
+
+        function renderSanggahList(appeals) {
+            if(!appeals || appeals.length === 0) {
+                return '<p class="text-gray-500 text-center py-8">Belum ada pengajuan sanggahan</p>';
+            }
+            
+            return appeals.map(a => {
+                let badgeColor = 'bg-yellow-100 text-yellow-700';
+                if(a.status === 'Disetujui') badgeColor = 'bg-green-100 text-green-700';
+                if(a.status === 'Ditolak') badgeColor = 'bg-red-100 text-red-700';
+                
+                return `<div class="border-b border-gray-200 py-4 last:border-b-0">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-600 mb-1">${a.request_date}</p>
+                            <p class="text-gray-800">${a.description}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${badgeColor}">${a.status}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ============= DOSEN PAGES =============
+        function renderDosenPage() {
+            const page = state.currentPage;
+            const content = document.getElementById('main-content');
+            
+            if(page === 'dashboard') {
+                content.innerHTML = getDosenDashboard();
+            } else if(page === 'kelas') {
+                content.innerHTML = getKelasPage();
+            } else if(page === 'presensi') {
+                content.innerHTML = getPresensiLogPage();
+            }
+        }
+
+        function getDosenDashboard() {
+            const d = state.dashboardData;
+            return `<div class="max-w-6xl mx-auto space-y-6 fade-in">
+                <div class="bg-gradient-to-r from-blue-700 to-blue-900 rounded-2xl p-8 text-white shadow-lg">
+                    <h2 class="text-3xl font-bold mb-2">Dashboard Dosen</h2>
+                    <p class="opacity-90">${state.currentUser.name}</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow">
+                        <h3 class="font-bold text-xl mb-4">Kelas yang Diampu</h3>
+                        ${renderKelasList(d.courses)}
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow">
+                        <h3 class="font-bold text-xl mb-4">Presensi Terbaru</h3>
+                        ${renderLogPresensi(d.logs.slice(0, 5))}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function getKelasPage() {
+            const d = state.dashboardData;
+            return `<div class="max-w-4xl mx-auto fade-in">
+                <h2 class="text-2xl font-bold mb-6">Kelas yang Diampu</h2>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    ${renderKelasList(d.courses, true)}
+                </div>
+            </div>`;
+        }
+
+        function getPresensiLogPage() {
+            const d = state.dashboardData;
+            return `<div class="max-w-6xl mx-auto fade-in">
+                <h2 class="text-2xl font-bold mb-6">Log Presensi Mahasiswa</h2>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b-2">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Mahasiswa</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Mata Kuliah</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            ${renderPresensiTable(d.logs)}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+
+        function renderKelasList(courses, detailed = false) {
+            if(!courses || courses.length === 0) {
+                return '<p class="text-gray-500 text-center py-8">Tidak ada kelas yang diampu</p>';
+            }
+            
+            return courses.map(c => `
+                <div class="border border-gray-200 rounded-lg p-4 mb-3 hover:border-blue-500 transition">
+                    <h4 class="font-bold text-lg">${c.name}</h4>
+                    <p class="text-sm text-gray-500">${c.code} • ${c.sks} SKS • Semester ${c.semester}</p>
+                    <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                        <span><i data-lucide="calendar" class="w-4 h-4 inline"></i> ${c.day}</span>
+                        <span><i data-lucide="clock" class="w-4 h-4 inline"></i> ${c.time_start} - ${c.time_end}</span>
+                        <span><i data-lucide="map-pin" class="w-4 h-4 inline"></i> ${c.room}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderLogPresensi(logs, limit = 5) {
+            if(!logs || logs.length === 0) {
+                return '<p class="text-gray-500 text-center py-8">Belum ada presensi hari ini</p>';
+            }
+            
+            return logs.slice(0, limit).map(log => `
+                <div class="border-b py-3 last:border-b-0">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold">${log.mhs_name}</p>
+                            <p class="text-sm text-gray-500">${log.course_name}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${log.status === 'Hadir' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${log.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPresensiTable(logs) {
+            if(!logs || logs.length === 0) {
+                return '<tr><td colspan="5" class="text-center py-8 text-gray-500">Belum ada data presensi</td></tr>';
+            }
+            
+            return logs.map(log => {
+                let statusClass = 'bg-green-100 text-green-700';
+                if(log.status === 'Sakit') statusClass = 'bg-yellow-100 text-yellow-700';
+                if(log.status === 'Izin') statusClass = 'bg-blue-100 text-blue-700';
+                
+                return `<tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">${log.mhs_name}</td>
+                    <td class="px-6 py-4">${log.course_name}</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-bold ${statusClass}">${log.status}</span></td>
+                    <td class="px-6 py-4">${log.date}</td>
+                    <td class="px-6 py-4">${log.timestamp}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ============= ADMIN PAGES =============
+        function renderAdminPage() {
+            const page = state.currentPage;
+            const content = document.getElementById('main-content');
+            
+            if(page === 'dashboard') {
+                content.innerHTML = getAdminDashboard();
+            } else if(page === 'sanggah') {
+                content.innerHTML = getSanggahAdminPage();
+            }
+        }
+
+        function getAdminDashboard() {
+            const d = state.dashboardData;
+            return `<div class="max-w-6xl mx-auto space-y-6 fade-in">
+                <div class="bg-gradient-to-r from-purple-700 to-purple-900 rounded-2xl p-8 text-white shadow-lg">
+                    <h2 class="text-3xl font-bold mb-2">Dashboard Admin</h2>
+                    <p class="opacity-90">Manajemen Sistem SEMAR</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow text-center">
+                        <i data-lucide="users" class="w-12 h-12 mx-auto text-blue-600 mb-2"></i>
+                        <p class="text-3xl font-bold text-gray-800">150</p>
+                        <p class="text-sm text-gray-500">Total Mahasiswa</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow text-center">
+                        <i data-lucide="file-question" class="w-12 h-12 mx-auto text-yellow-600 mb-2"></i>
+                        <p class="text-3xl font-bold text-gray-800">${d.appeals.filter(a => a.status === 'Menunggu').length}</p>
+                        <p class="text-sm text-gray-500">Sanggah Menunggu</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow text-center">
+                        <i data-lucide="check-circle" class="w-12 h-12 mx-auto text-green-600 mb-2"></i>
+                        <p class="text-3xl font-bold text-gray-800">${d.appeals.filter(a => a.status === 'Disetujui').length}</p>
+                        <p class="text-sm text-gray-500">Sanggah Disetujui</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-bold text-xl mb-4">Sanggah UKT Terbaru</h3>
+                    ${renderSanggahAdmin(d.appeals.slice(0, 10))}
+                </div>
+            </div>`;
+        }
+
+        function getSanggahAdminPage() {
+            const d = state.dashboardData;
+            return `<div class="max-w-6xl mx-auto fade-in">
+                <h2 class="text-2xl font-bold mb-6">Manajemen Sanggah UKT</h2>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    ${renderSanggahAdmin(d.appeals, true)}
+                </div>
+            </div>`;
+        }
+
+        function renderSanggahAdmin(appeals, showActions = true) {
+            if(!appeals || appeals.length === 0) {
+                return '<p class="text-gray-500 text-center py-8">Tidak ada pengajuan sanggahan</p>';
+            }
+            
+            return `<div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b-2">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Mahasiswa</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">NIM</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Alasan</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Tanggal</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Status</th>
+                            ${showActions ? '<th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Aksi</th>' : ''}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        ${appeals.map(a => {
+                            let statusClass = 'bg-yellow-100 text-yellow-700';
+                            if(a.status === 'Disetujui') statusClass = 'bg-green-100 text-green-700';
+                            if(a.status === 'Ditolak') statusClass = 'bg-red-100 text-red-700';
+                            
+                            return `<tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3">${a.name}</td>
+                                <td class="px-4 py-3">${a.nim}</td>
+                                <td class="px-4 py-3 max-w-xs truncate">${a.description}</td>
+                                <td class="px-4 py-3">${a.request_date}</td>
+                                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${statusClass}">${a.status}</span></td>
+                                ${showActions && a.status === 'Menunggu' ? `
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-2">
+                                            <button onclick="updateSanggah(${a.id}, 'Disetujui')" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">Setuju</button>
+                                            <button onclick="updateSanggah(${a.id}, 'Ditolak')" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700">Tolak</button>
+                                        </div>
+                                    </td>
+                                ` : showActions ? '<td class="px-4 py-3 text-gray-400 text-xs">Selesai</td>' : ''}
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        }
+
+        async function updateSanggah(id, status) {
+            if(!confirm(`Yakin ingin ${status === 'Disetujui' ? 'menyetujui' : 'menolak'} sanggahan ini?`)) return;
+            
+            const fd = new FormData();
+            fd.append('id', id);
+            fd.append('status', status);
+            
+            try {
+                const res = await fetch(API_URL + 'action_admin.php', {method: 'POST', body: fd});
+                const d = await res.json();
+                showToast(d.status === 'success' ? 'Sukses' : 'Gagal', d.message, d.status !== 'success');
+                
+                if(d.status === 'success') {
+                    await loadData();
+                    renderPage();
+                }
+            } catch(e) {
+                showToast('Error', 'Gagal memproses', true);
+            }
+        }
+
+        // ============= ACTIONS =============
+        async function doAction(type, id = null) {
             const fd = new FormData();
             fd.append('action', type);
-            if(type==='presensi') fd.append('course_id', id);
-            if(type==='sanggah_ukt') {
-                const val = document.getElementById('ukt-alasan').value;
-                if(!val) return showToast('Error', 'Isi alasan!', true);
+            
+            if(type === 'presensi') {
+                fd.append('course_id', id);
+            } else if(type === 'sanggah_ukt') {
+                const val = document.getElementById('ukt-alasan').value.trim();
+                if(!val) return showToast('Error', 'Isi alasan sanggahan!', true);
                 fd.append('desc', val);
             }
 
             try {
-                const res = await fetch('api/action_mhs.php', {method:'POST', body:fd});
+                const res = await fetch(API_URL + 'action_mhs.php', {method: 'POST', body: fd});
                 const d = await res.json();
-                showToast(d.status==='success'?'Sukses':'Gagal', d.message, d.status!=='success');
-                if(d.status==='success') {
-                    await loadData(); // Refresh Data
-                    renderMhsDashboard(); // Re-render UI
+                showToast(d.status === 'success' ? 'Sukses' : 'Gagal', d.message, d.status !== 'success');
+                
+                if(d.status === 'success') {
+                    if(type === 'sanggah_ukt') document.getElementById('ukt-alasan').value = '';
+                    await loadData();
+                    renderPage();
                 }
-            } catch(e) { showToast('Error', 'Gagal memproses', true); }
+            } catch(e) {
+                console.error(e);
+                showToast('Error', 'Gagal memproses', true);
+            }
         }
 
         async function doUpload(e, id) {
             e.preventDefault();
-            const file = e.target.querySelector('input').files[0];
+            const file = e.target.querySelector('input[type="file"]').files[0];
+            if(!file) return showToast('Error', 'Pilih file!', true);
+            
             const fd = new FormData();
             fd.append('action', 'upload_tugas');
             fd.append('assignment_id', id);
             fd.append('file', file);
 
             try {
-                const res = await fetch('api/action_mhs.php', {method:'POST', body:fd});
+                const btn = e.target.querySelector('button');
+                btn.disabled = true;
+                btn.innerText = 'Uploading...';
+                
+                const res = await fetch(API_URL + 'action_mhs.php', {method: 'POST', body: fd});
                 const d = await res.json();
-                showToast(d.status==='success'?'Sukses':'Gagal', d.message, d.status!=='success');
-                if(d.status==='success') { await loadData(); renderMhsDashboard(); }
-            } catch(e) { showToast('Error', 'Gagal upload', true); }
+                showToast(d.status === 'success' ? 'Sukses' : 'Gagal', d.message, d.status !== 'success');
+                
+                if(d.status === 'success') {
+                    await loadData();
+                    renderPage();
+                }
+                
+                btn.disabled = false;
+                btn.innerText = 'Upload';
+            } catch(e) {
+                console.error(e);
+                showToast('Error', 'Gagal upload', true);
+            }
         }
 
-        // --- UTILS ---
-        function showToast(title, msg, err=false) {
+        // ============= UTILS =============
+        function showToast(title, msg, err = false) {
             const t = document.getElementById('toast');
             document.getElementById('toast-title').innerText = title;
             document.getElementById('toast-msg').innerText = msg;
-            t.className = `fixed top-5 right-5 border-l-4 p-4 rounded shadow-xl transition transform z-50 min-w-[300px] bg-white ${err ? 'border-red-500' : 'border-green-500'} translate-x-0`;
-            setTimeout(() => t.classList.add('translate-x-full'), 3000);
+            
+            t.className = `fixed top-5 right-5 border-l-4 px-6 py-4 rounded-lg shadow-2xl transform transition-transform duration-300 z-[60] flex items-center gap-4 min-w-[300px] bg-white ${err ? 'border-red-500' : 'border-primary'} translate-x-0`;
+            
+            document.getElementById('toast-icon').innerHTML = `<i data-lucide="${err ? 'alert-circle' : 'check-circle'}" class="w-6 h-6 ${err ? 'text-red-500' : 'text-primary'}"></i>`;
+            
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                t.classList.add('translate-x-full');
+            }, 3000);
         }
-        function toggleSidebar() { /* Logic toggle sederhana */ }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Init
         lucide.createIcons();
     </script>
 </body>

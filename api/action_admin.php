@@ -1,12 +1,19 @@
 <?php
-include 'db.php';
-if($_SESSION['user']['role'] != 'admin') exit;
+require_once 'db.php';
 
-$id = $_POST['id'];
+if(!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'admin') {
+    echo json_encode(["status" => "error", "message" => "Unauthorized"]);
+    exit;
+}
+
+$id = (int)$_POST['id'];
 $status = $_POST['status']; // 'Disetujui' or 'Ditolak'
 
-$stmt = $conn->prepare("UPDATE ukt_appeals SET status = :st WHERE id = :id");
-$stmt->execute(['st'=>$status, 'id'=>$id]);
+$status = $conn->real_escape_string($status);
 
-echo json_encode(["status"=>"success", "message"=>"Status diupdate!"]);
-?>
+$sql = "UPDATE ukt_appeals SET status = '$status' WHERE id = $id";
+if($conn->query($sql)) {
+    echo json_encode(["status" => "success", "message" => "Status sanggah berhasil diupdate!"]);
+} else {
+    echo json_encode(["status" => "error", "message" => "Gagal update: " . $conn->error]);
+}
