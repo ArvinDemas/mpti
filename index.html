@@ -32,13 +32,19 @@
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .radio-card:checked + div { border-color: #15803d; background-color: #f0fdf4; color: #14532d; box-shadow: 0 4px 6px -1px rgba(21, 128, 61, 0.15); }
-        .radio-card:checked + div .check-icon { opacity: 1; transform: scale(1); color: #ca8a04; }
+        
+        /* Table Styles */
+        .table-header { @apply px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50; }
+        .table-cell { @apply px-6 py-4 whitespace-nowrap text-sm text-gray-700 border-b border-gray-100; }
+        .badge { @apply px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full; }
+        
+        /* Loading Spinner */
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #15803d; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen font-sans text-gray-800">
 
-    <!-- LOGIN SCREEN -->
     <div id="login-container" class="min-h-screen flex items-center justify-center p-4 md:p-8 bg-slate-100">
         <div class="bg-white w-full max-w-6xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[650px]">
             
@@ -63,7 +69,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-600 mb-2">Password</label>
-                                <input type="text" id="login-password" value="password"
+                                <input type="password" id="login-password" value="password"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition text-gray-700 bg-bgInput"
                                     placeholder="Masukkan Password">
                             </div>
@@ -76,13 +82,6 @@
                         <div class="flex justify-between items-center mt-8 text-sm font-medium text-gray-500">
                             <button onclick="showToast('Info', 'Hubungi admin untuk aktivasi akun')" class="hover:text-primary transition">Aktivasi Akun</button>
                             <button onclick="showToast('Info', 'Hubungi admin untuk reset password')" class="hover:text-primary transition">Lupa Password?</button>
-                        </div>
-                        
-                        <!-- DEBUG INFO -->
-                        <div id="debug-info" class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-xs">
-                            <p class="font-bold text-gray-700 mb-2">🔍 Debug Info:</p>
-                            <p class="text-gray-600">Status: <span id="debug-status" class="font-mono text-red-600">Belum login</span></p>
-                            <p class="text-gray-600 mt-1">Response: <span id="debug-response" class="font-mono">-</span></p>
                         </div>
                     </div>
                 </div>
@@ -116,120 +115,134 @@
         </div>
     </div>
 
-    <!-- APP CONTAINER -->
     <div id="app-container" class="hidden flex h-screen overflow-hidden bg-gray-100">
         
         <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 text-gray-700 flex flex-col transition-all duration-300 transform translate-x-0 z-30 fixed md:relative h-full">
             <div class="p-6 bg-green-50 border-b border-green-100">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-green-900 rounded-full flex items-center justify-center text-white font-bold shadow-sm ring-2 ring-gray-200 ring-offset-2" id="avatar">A</div>
+                    <div class="w-10 h-10 bg-green-900 rounded-full flex items-center justify-center text-white font-bold shadow-sm ring-2 ring-gray-200 ring-offset-2" id="avatar">U</div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-bold truncate text-gray-900" id="sidebar-username">User</p>
-                        <p class="text-xs text-primary font-medium" id="sidebar-role">Loading...</p>
+                        <p class="text-xs text-primary font-medium" id="sidebar-role">ROLE</p>
                     </div>
                 </div>
             </div>
-            <nav class="flex-1 py-4 overflow-y-auto space-y-1 px-3" id="nav-links"></nav>
-            <div class="p-4 border-t">
-                <button onclick="handleLogout()" class="w-full bg-red-50 text-red-600 hover:bg-red-100 py-2 px-4 rounded-lg font-bold transition flex items-center justify-center gap-2">
-                    <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+            
+            <nav class="flex-1 py-4 overflow-y-auto space-y-1 px-3" id="nav-links">
+                </nav>
+
+            <div class="p-4 border-t border-gray-200">
+                <button onclick="handleLogout()" class="w-full bg-red-50 text-red-600 hover:bg-red-100 py-2.5 px-4 rounded-lg font-bold transition flex items-center justify-center gap-2 group">
+                    <i data-lucide="log-out" class="w-4 h-4 group-hover:-translate-x-1 transition"></i> Keluar
                 </button>
             </div>
         </aside>
 
-        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-            <header class="md:hidden bg-white border-b p-4 flex justify-between items-center z-20">
-                <button onclick="toggleSidebar()" class="p-2"><i data-lucide="menu" class="w-6 h-6"></i></button>
-                <h1 class="font-bold text-lg text-primary">SEMAR</h1>
-                <div class="bg-green-50 p-2 rounded-full">
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+            
+            <header class="md:hidden bg-white border-b p-4 flex justify-between items-center z-20 shadow-sm">
+                <button onclick="toggleSidebar()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><i data-lucide="menu" class="w-6 h-6"></i></button>
+                <h1 class="font-bold text-lg text-primary tracking-tight">SEMAR MOBILE</h1>
+                <div class="bg-green-100 p-2 rounded-full">
                     <i data-lucide="user" class="w-5 h-5 text-primary"></i>
                 </div>
             </header>
-            <main id="main-content" class="flex-1 overflow-y-auto bg-gray-100 p-4 md:p-8 relative"></main>
+
+            <main id="main-content" class="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8 relative scroll-smooth">
+                </main>
         </div>
 
-        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden"></div>
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="fixed top-5 right-5 bg-white border-l-4 border-primary text-gray-800 px-6 py-4 rounded-lg shadow-2xl transform translate-x-full transition-transform duration-300 z-[60] flex items-center gap-4 min-w-[300px]">
+    <div id="toast" class="fixed top-5 right-5 bg-white border-l-4 border-primary text-gray-800 px-6 py-4 rounded-lg shadow-2xl transform translate-x-full transition-transform duration-300 z-[60] flex items-center gap-4 min-w-[320px]">
         <div id="toast-icon" class="text-primary"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
-        <div><h4 class="font-bold text-sm" id="toast-title">Pesan</h4><p id="toast-msg" class="text-sm text-gray-600">...</p></div>
+        <div>
+            <h4 class="font-bold text-sm text-gray-900" id="toast-title">Notifikasi</h4>
+            <p id="toast-msg" class="text-xs text-gray-500 mt-1">Pesan detail...</p>
+        </div>
+        <button onclick="hideToast()" class="ml-auto text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-4 h-4"></i></button>
     </div>
 
     <script>
-        const API_URL = 'api/';
+        // Configuration
+        const API_URL = 'api/'; // Base URL for PHP Backend
+        
+        // Global State
         const state = { 
             isLoggedIn: false, 
             currentUser: null, 
             dashboardData: null,
-            currentPage: 'dashboard'
+            currentPage: 'dashboard',
+            isLoading: false
         };
 
-        // ============= AUTH =============
+        // ==========================================
+        // AUTHENTICATION SYSTEM
+        // ==========================================
         async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-login');
             const originalText = btn.innerHTML;
-            btn.innerHTML = "Loading..."; 
+            
+            // Set Loading State
+            btn.innerHTML = '<div class="loader mr-2"></div> Memproses...'; 
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
             btn.disabled = true;
 
             const nim = document.getElementById('login-username').value.trim();
             const pass = document.getElementById('login-password').value;
 
-            // Debug display
-            document.getElementById('debug-status').innerHTML = `Mencoba login...<br>Username: ${nim}<br>Password: ${pass}`;
-            document.getElementById('debug-response').innerHTML = 'Mengirim request...';
-
             try {
-                const payload = JSON.stringify({username:nim, password:pass});
-                console.log('Sending:', payload);
-                
-                const res = await fetch(API_URL + 'login.php', { 
-                    method:'POST',
+                // Fetch to PHP Backend
+                const response = await fetch(API_URL + 'login.php', { 
+                    method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: payload
+                    body: JSON.stringify({username: nim, password: pass})
                 });
-                
-                const responseText = await res.text();
-                console.log('Raw response:', responseText);
-                
-                // Update debug
-                document.getElementById('debug-response').innerHTML = responseText.substring(0, 200);
-                
-                const d = JSON.parse(responseText);
-                console.log('Parsed:', d);
 
-                if(d.status === 'success') {
-                    state.currentUser = d.data;
+                // Parse Response
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (err) {
+                    console.error("Invalid JSON:", text);
+                    throw new Error("Respon server tidak valid.");
+                }
+
+                if (data.status === 'success') {
+                    // Success Logic
+                    state.currentUser = data.data;
                     state.isLoggedIn = true;
                     
-                    document.getElementById('debug-status').innerHTML = '<span class="text-green-600">✅ Login Berhasil!</span>';
+                    // Initial Data Load
+                    await loadDashboardData();
                     
-                    await loadData();
-                    
+                    // Switch UI
                     document.getElementById('login-container').classList.add('hidden');
                     document.getElementById('app-container').classList.remove('hidden');
                     
-                    initUI();
-                    showToast('Sukses', `Selamat datang, ${state.currentUser.name}!`);
+                    initSidebarAndHeader();
+                    showToast('Login Berhasil', `Selamat datang kembali, ${state.currentUser.name}!`);
                 } else {
-                    document.getElementById('debug-status').innerHTML = '<span class="text-red-600">❌ ' + d.message + '</span>';
-                    showToast('Gagal', d.message, true);
+                    // Failed Logic
+                    showToast('Login Gagal', data.message || 'Username atau password salah', true);
                 }
-            } catch(err) { 
-                console.error('Error:', err);
-                document.getElementById('debug-status').innerHTML = '<span class="text-red-600">❌ Error: ' + err.message + '</span>';
-                showToast('Error', 'Gagal koneksi ke server: ' + err.message, true); 
-            }
-            finally { 
+            } catch (err) { 
+                console.error('Login Error:', err);
+                showToast('Koneksi Error', 'Gagal terhubung ke server. Cek internet/server database.', true); 
+            } finally { 
+                // Reset Button
                 btn.innerHTML = originalText; 
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
                 btn.disabled = false; 
+                lucide.createIcons();
             }
         }
 
         async function handleLogout() {
-            if(confirm('Yakin ingin keluar?')) {
+            if (confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
                 try {
                     await fetch(API_URL + 'logout.php');
                     state.isLoggedIn = false;
@@ -238,635 +251,869 @@
                     
                     document.getElementById('app-container').classList.add('hidden');
                     document.getElementById('login-container').classList.remove('hidden');
-                    showToast('Info', 'Anda telah keluar');
-                } catch(e) {
-                    console.error(e);
+                    document.getElementById('login-password').value = '';
+                    showToast('Logout', 'Anda telah keluar dari sesi.');
+                } catch (e) {
+                    console.error("Logout Error", e);
                 }
             }
         }
 
-        async function loadData() {
+        // ==========================================
+        // DATA MANAGEMENT
+        // ==========================================
+        async function loadDashboardData() {
+            if (!state.currentUser) return;
+
             const role = state.currentUser.role;
             let endpoint = '';
             
-            if(role === 'mahasiswa') endpoint = 'get_dashboard_mhs.php';
-            else if(role === 'dosen') endpoint = 'get_dashboard_dosen.php';
-            else if(role === 'admin') endpoint = 'get_dashboard_admin.php';
+            // Determine Endpoint based on Role
+            if (role === 'mahasiswa') endpoint = 'get_dashboard_mhs.php';
+            else if (role === 'dosen') endpoint = 'get_dashboard_dosen.php';
+            else if (role === 'admin') endpoint = 'get_dashboard_admin.php';
 
             try {
+                state.isLoading = true;
                 const res = await fetch(API_URL + endpoint);
-                const d = await res.json();
-                if(d.status === 'success') {
-                    state.dashboardData = d.data;
+                const json = await res.json();
+
+                if (json.status === 'success') {
+                    state.dashboardData = json.data;
+                } else {
+                    showToast('Data Error', 'Gagal memuat data dashboard: ' + json.message, true);
+                    // Initialize empty structure to prevent crashes
+                    state.dashboardData = getEmptyDataStructure(role);
                 }
-            } catch(e) {
-                console.error('Load data error:', e);
+            } catch (e) {
+                console.error('Data Load Error:', e);
+                showToast('Network Error', 'Gagal mengambil data dari server.', true);
+                state.dashboardData = getEmptyDataStructure(role);
+            } finally {
+                state.isLoading = false;
             }
         }
 
-        function initUI() {
+        function getEmptyDataStructure(role) {
+            if (role === 'mahasiswa') return { schedule: [], tasks: [], appeals: [] };
+            if (role === 'dosen') return { courses: [], logs: [], tasks: [] };
+            if (role === 'admin') return { appeals: [], users: [] };
+            return {};
+        }
+
+        // ==========================================
+        // UI RENDERING ENGINE
+        // ==========================================
+        function initSidebarAndHeader() {
+            // Set User Info in Sidebar
             document.getElementById('sidebar-username').innerText = state.currentUser.name;
             document.getElementById('sidebar-role').innerText = state.currentUser.role.toUpperCase();
             document.getElementById('avatar').innerText = state.currentUser.name.charAt(0).toUpperCase();
             
-            renderSidebar();
-            renderPage();
-            lucide.createIcons();
+            // Generate Sidebar Links
+            renderSidebarLinks();
+            
+            // Render Initial Page
+            navigateTo('dashboard');
         }
 
-        function renderSidebar() {
+        function renderSidebarLinks() {
             const role = state.currentUser.role;
             let items = [];
 
-            if(role === 'mahasiswa') {
+            if (role === 'mahasiswa') {
                 items = [
                     { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
-                    { id: 'jadwal', label: 'Jadwal & Presensi', icon: 'calendar' },
-                    { id: 'tugas', label: 'Tugas Kuliah', icon: 'file-text' },
-                    { id: 'ukt', label: 'Sanggah UKT', icon: 'wallet' },
+                    { id: 'jadwal', label: 'Jadwal & Presensi', icon: 'calendar-check' },
+                    { id: 'tugas', label: 'Tugas Kuliah', icon: 'book-open' },
+                    { id: 'ukt', label: 'Layanan Keuangan', icon: 'wallet' },
                 ];
-            } else if(role === 'dosen') {
+            } else if (role === 'dosen') {
                 items = [
                     { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
-                    { id: 'kelas', label: 'Kelas Saya', icon: 'users' },
-                    { id: 'presensi', label: 'Log Presensi', icon: 'check-circle' },
-                    { id: 'tugas_dosen', label: 'Manajemen Tugas', icon: 'clipboard-list' },
+                    { id: 'kelas', label: 'Kelas Ajar', icon: 'users' },
+                    { id: 'presensi', label: 'Log Kehadiran', icon: 'clipboard-list' },
+                    { id: 'tugas_dosen', label: 'Manajemen Tugas', icon: 'file-plus' },
                 ];
-            } else if(role === 'admin') {
+            } else if (role === 'admin') {
                 items = [
                     { id: 'dashboard', label: 'Dashboard', icon: 'layout-dashboard' },
-                    { id: 'sanggah', label: 'Sanggah UKT', icon: 'file-question' },
-                    { id: 'users', label: 'Manajemen User', icon: 'users' },
+                    { id: 'sanggah', label: 'Verifikasi UKT', icon: 'file-check' },
+                    { id: 'users', label: 'Data Pengguna', icon: 'user-cog' },
                 ];
             }
 
             const html = items.map(item => {
-                const active = state.currentPage === item.id;
-                return `<button onclick="navigateTo('${item.id}')" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${active ? 'bg-green-50 text-primary font-semibold border-r-4 border-primary' : 'text-gray-600 hover:bg-green-50 hover:text-primary'}">
-                    <i data-lucide="${item.icon}" class="w-5 h-5 ${active ? 'text-primary' : ''}"></i>
-                    <span class="text-sm">${item.label}</span>
+                const isActive = state.currentPage === item.id;
+                const activeClass = isActive ? 'bg-green-50 text-primary border-r-4 border-primary font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-primary';
+                
+                return `
+                <button onclick="navigateTo('${item.id}')" class="w-full flex items-center gap-3 px-4 py-3 text-sm transition-all duration-200 ${activeClass}">
+                    <i data-lucide="${item.icon}" class="w-5 h-5"></i>
+                    <span>${item.label}</span>
                 </button>`;
             }).join('');
 
             document.getElementById('nav-links').innerHTML = html;
+            lucide.createIcons();
         }
 
         function navigateTo(pageId) {
             state.currentPage = pageId;
-            renderSidebar();
-            renderPage();
+            renderSidebarLinks(); // Re-render sidebar to update active state
             
-            if(window.innerWidth < 768) {
-                const sidebar = document.getElementById('sidebar');
-                if(!sidebar.classList.contains('-translate-x-full')) toggleSidebar();
-            }
-        }
-
-        function renderPage() {
             const content = document.getElementById('main-content');
-            const role = state.currentUser.role;
             
-            content.innerHTML = '<div class="text-center py-20"><i data-lucide="loader-2" class="w-12 h-12 animate-spin mx-auto text-primary"></i></div>';
+            // Show Loading Indicator
+            content.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full min-h-[400px]">
+                    <div class="loader mb-4" style="width: 40px; height: 40px; border-width: 4px;"></div>
+                    <p class="text-gray-500 font-medium">Memuat Halaman...</p>
+                </div>`;
             
+            // Simulate slight delay for smoothness (optional) & Render
             setTimeout(() => {
-                if(role === 'mahasiswa') renderMahasiswaPage();
-                else if(role === 'dosen') renderDosenPage();
-                else if(role === 'admin') renderAdminPage();
+                const role = state.currentUser.role;
+                if (role === 'mahasiswa') renderMahasiswaPages(pageId);
+                else if (role === 'dosen') renderDosenPages(pageId);
+                else if (role === 'admin') renderAdminPages(pageId);
+                
                 lucide.createIcons();
-            }, 100);
+                
+                // Auto close sidebar on mobile
+                if (window.innerWidth < 768) {
+                    const sidebar = document.getElementById('sidebar');
+                    const overlay = document.getElementById('sidebar-overlay');
+                    if (!sidebar.classList.contains('-translate-x-full')) {
+                        sidebar.classList.add('-translate-x-full');
+                        overlay.classList.add('hidden');
+                    }
+                }
+            }, 150);
         }
 
-        // ============= MAHASISWA PAGES =============
-        function renderMahasiswaPage() {
-            const page = state.currentPage;
+        // ==========================================
+        // MAHASISWA PAGES RENDERER
+        // ==========================================
+        function renderMahasiswaPages(page) {
             const content = document.getElementById('main-content');
-            
-            if(page === 'dashboard') {
-                content.innerHTML = getMahasiswaDashboard();
-            } else if(page === 'jadwal') {
-                content.innerHTML = getJadwalPage();
-            } else if(page === 'tugas') {
-                content.innerHTML = getTugasPage();
-            } else if(page === 'ukt') {
-                content.innerHTML = getUKTPage();
-            }
-        }
+            const data = state.dashboardData || { schedule: [], tasks: [], appeals: [] };
 
-        function getMahasiswaDashboard() {
-            const d = state.dashboardData;
-            const user = state.currentUser;
-            
-            return `<div class="max-w-6xl mx-auto space-y-6 fade-in">
-                <div class="bg-gradient-to-r from-green-700 to-green-900 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-64 h-64 bg-yellow-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
-                    <div class="relative z-10">
-                        <h2 class="text-3xl font-bold mb-2">Halo, ${user.name.split(' ')[0]}! 👋</h2>
-                        <p class="opacity-90 mb-4">${user.major} • ${user.username}</p>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
-                                <p class="text-xs text-green-100">IPK</p>
-                                <p class="text-2xl font-bold">3.85</p>
-                            </div>
-                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
-                                <p class="text-xs text-green-100">SKS</p>
-                                <p class="text-2xl font-bold">88</p>
-                            </div>
-                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
-                                <p class="text-xs text-green-100">Semester</p>
-                                <p class="text-2xl font-bold">5</p>
-                            </div>
-                            <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
-                                <p class="text-xs text-green-100">Kehadiran</p>
-                                <p class="text-2xl font-bold">92%</p>
+            if (page === 'dashboard') {
+                content.innerHTML = `
+                    <div class="max-w-6xl mx-auto space-y-6 fade-in">
+                        <div class="bg-gradient-to-r from-green-700 to-green-900 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
+                            <div class="absolute right-0 top-0 w-64 h-64 bg-yellow-400 rounded-full mix-blend-overlay filter blur-3xl opacity-20 transform translate-x-1/2 -translate-y-1/2"></div>
+                            <div class="relative z-10">
+                                <h2 class="text-3xl font-bold mb-1">Halo, ${state.currentUser.name.split(' ')[0]}! 👋</h2>
+                                <p class="opacity-90 text-green-100 text-sm mb-6">${state.currentUser.major} • ${state.currentUser.username}</p>
+                                
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div class="bg-white/10 p-4 rounded-xl backdrop-blur-md border border-white/10">
+                                        <p class="text-xs text-green-200 uppercase tracking-wider mb-1">IPK Semester</p>
+                                        <p class="text-2xl font-bold tracking-tight">3.85</p>
+                                    </div>
+                                    <div class="bg-white/10 p-4 rounded-xl backdrop-blur-md border border-white/10">
+                                        <p class="text-xs text-green-200 uppercase tracking-wider mb-1">Total SKS</p>
+                                        <p class="text-2xl font-bold tracking-tight">88</p>
+                                    </div>
+                                    <div class="bg-white/10 p-4 rounded-xl backdrop-blur-md border border-white/10">
+                                        <p class="text-xs text-green-200 uppercase tracking-wider mb-1">Semester</p>
+                                        <p class="text-2xl font-bold tracking-tight">5</p>
+                                    </div>
+                                    <div class="bg-white/10 p-4 rounded-xl backdrop-blur-md border border-white/10">
+                                        <p class="text-xs text-green-200 uppercase tracking-wider mb-1">Status</p>
+                                        <p class="text-lg font-bold tracking-tight text-green-300">Aktif</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow border-t-4 border-green-600">
-                        <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
-                            <i data-lucide="calendar-check" class="w-5 h-5 text-green-600"></i> 
-                            Jadwal Hari Ini
-                        </h3>
-                        ${renderJadwalCards(d.schedule.slice(0, 2))}
-                    </div>
+                        <div class="grid lg:grid-cols-2 gap-6">
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-bold text-lg text-gray-800 flex items-center gap-2">
+                                        <div class="p-2 bg-green-100 rounded-lg text-primary"><i data-lucide="calendar" class="w-5 h-5"></i></div>
+                                        Jadwal Hari Ini
+                                    </h3>
+                                    <button onclick="navigateTo('jadwal')" class="text-xs font-bold text-primary hover:underline">Lihat Semua</button>
+                                </div>
+                                ${renderScheduleList(data.schedule.slice(0, 3))}
+                            </div>
 
-                    <div class="bg-white p-6 rounded-xl shadow border-t-4 border-yellow-500">
-                        <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
-                            <i data-lucide="clipboard-list" class="w-5 h-5 text-yellow-600"></i> 
-                            Tugas Mendatang
-                        </h3>
-                        ${renderTugasCards(d.tasks.slice(0, 2))}
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        function getJadwalPage() {
-            const d = state.dashboardData;
-            return `<div class="max-w-4xl mx-auto fade-in">
-                <h2 class="text-2xl font-bold mb-6">Jadwal & Presensi</h2>
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    ${renderJadwalCards(d.schedule, true)}
-                </div>
-            </div>`;
-        }
-
-        function getTugasPage() {
-            const d = state.dashboardData;
-            return `<div class="max-w-4xl mx-auto fade-in">
-                <h2 class="text-2xl font-bold mb-6">Tugas Kuliah</h2>
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    ${renderTugasCards(d.tasks, true)}
-                </div>
-            </div>`;
-        }
-
-        function getUKTPage() {
-            const d = state.dashboardData;
-            return `<div class="max-w-4xl mx-auto fade-in">
-                <h2 class="text-2xl font-bold mb-6">Sanggah UKT</h2>
-                
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                    <h3 class="font-bold text-lg mb-4">Ajukan Sanggah Baru</h3>
-                    <div class="flex gap-2">
-                        <input id="ukt-alasan" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary" placeholder="Jelaskan alasan sanggah Anda...">
-                        <button onclick="doAction('sanggah_ukt')" class="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-primaryDark transition">
-                            Kirim
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="font-bold text-lg mb-4">Riwayat Sanggahan</h3>
-                    ${renderSanggahList(d.appeals)}
-                </div>
-            </div>`;
-        }
-
-        function renderJadwalCards(schedule, showAll = false) {
-            if(!schedule || schedule.length === 0) {
-                return '<p class="text-gray-500 text-center py-8">Tidak ada jadwal hari ini</p>';
-            }
-            
-            return schedule.map(c => {
-                const isPresent = parseInt(c.is_present) > 0;
-                const btn = isPresent 
-                    ? `<button disabled class="w-full bg-green-100 text-green-800 py-2 rounded-lg font-bold mt-3 cursor-not-allowed flex items-center justify-center gap-2">
-                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> Hadir (${c.present_time || 'Tercatat'})
-                    </button>`
-                    : `<button onclick="doAction('presensi', ${c.id})" class="w-full bg-primary text-white py-2 rounded-lg font-bold mt-3 hover:bg-primaryDark transition flex items-center justify-center gap-2">
-                        <i data-lucide="fingerprint" class="w-4 h-4"></i> Presensi Sekarang
-                    </button>`;
-                
-                return `<div class="border border-gray-200 rounded-lg p-4 mb-3 hover:border-primary transition">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="font-bold text-lg">${c.name}</h4>
-                            <p class="text-sm text-gray-500">${c.code} • ${c.sks} SKS</p>
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-bold text-lg text-gray-800 flex items-center gap-2">
+                                        <div class="p-2 bg-yellow-100 rounded-lg text-yellow-600"><i data-lucide="bell" class="w-5 h-5"></i></div>
+                                        Tugas Terbaru
+                                    </h3>
+                                    <button onclick="navigateTo('tugas')" class="text-xs font-bold text-primary hover:underline">Lihat Semua</button>
+                                </div>
+                                ${renderTaskList(data.tasks.slice(0, 3))}
+                            </div>
                         </div>
-                        <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold">${c.time_start} - ${c.time_end}</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <i data-lucide="map-pin" class="w-4 h-4"></i>
-                        <span>Ruang ${c.room}</span>
-                        <span class="text-gray-400">•</span>
-                        <span>${c.day}</span>
-                    </div>
-                    ${btn}
-                </div>`;
-            }).join('');
-        }
-
-        function renderTugasCards(tasks, showAll = false) {
-            if(!tasks || tasks.length === 0) {
-                return '<p class="text-gray-500 text-center py-8">Tidak ada tugas aktif</p>';
-            }
-            
-            return tasks.map(t => {
-                const isSubmitted = t.submitted_at != null;
-                const deadline = new Date(t.deadline);
-                const isOverdue = deadline < new Date();
-                
-                const statusDiv = isSubmitted 
-                    ? `<div class="bg-green-50 text-green-700 p-3 rounded-lg text-sm font-bold mt-3 flex items-center gap-2">
-                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> 
-                        Terkirim: ${new Date(t.submitted_at).toLocaleString('id-ID')}
-                    </div>`
-                    : `<form onsubmit="doUpload(event, ${t.id})" class="flex gap-2 mt-3">
-                        <input type="file" required class="flex-1 text-sm border rounded-lg px-3 py-2">
-                        <button type="submit" class="bg-blue-600 text-white px-4 rounded-lg text-sm hover:bg-blue-700 font-bold">
-                            Upload
-                        </button>
-                    </form>`;
-                
-                return `<div class="border border-gray-200 rounded-lg p-4 mb-3 hover:border-primary transition ${isOverdue && !isSubmitted ? 'border-l-4 border-l-red-500' : ''}">
-                    <h4 class="font-bold text-lg mb-1">${t.title}</h4>
-                    <p class="text-sm text-gray-500 mb-1">${t.course_name || 'Mata Kuliah'}</p>
-                    <div class="flex items-center gap-2 text-sm ${isOverdue && !isSubmitted ? 'text-red-600' : 'text-gray-600'}">
-                        <i data-lucide="clock" class="w-4 h-4"></i>
-                        <span>Deadline: ${deadline.toLocaleString('id-ID', {dateStyle: 'medium', timeStyle: 'short'})}</span>
-                    </div>
-                    ${statusDiv}
-                </div>`;
-            }).join('');
-        }
-
-        function renderSanggahList(appeals) {
-            if(!appeals || appeals.length === 0) {
-                return '<p class="text-gray-500 text-center py-8">Belum ada pengajuan sanggahan</p>';
-            }
-            
-            return appeals.map(a => {
-                let badgeColor = 'bg-yellow-100 text-yellow-700';
-                if(a.status === 'Disetujui') badgeColor = 'bg-green-100 text-green-700';
-                if(a.status === 'Ditolak') badgeColor = 'bg-red-100 text-red-700';
-                
-                return `<div class="border-b border-gray-200 py-4 last:border-b-0">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex-1">
-                            <p class="text-sm text-gray-600 mb-1">${a.request_date}</p>
-                            <p class="text-gray-800">${a.description}</p>
+                    </div>`;
+            } 
+            else if (page === 'jadwal') {
+                content.innerHTML = `
+                    <div class="max-w-4xl mx-auto fade-in">
+                        <div class="flex justify-between items-end mb-6">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900">Jadwal Perkuliahan</h2>
+                                <p class="text-gray-500 text-sm">Kelola kehadiran dan lihat jadwal kelas Anda.</p>
+                            </div>
+                            <span class="bg-green-100 text-primary px-3 py-1 rounded-full text-xs font-bold">Semester Ganjil 2024/2025</span>
                         </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-bold ${badgeColor}">${a.status}</span>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        // ============= DOSEN PAGES =============
-        function renderDosenPage() {
-            const page = state.currentPage;
-            const content = document.getElementById('main-content');
-            
-            if(page === 'dashboard') {
-                content.innerHTML = getDosenDashboard();
-            } else if(page === 'kelas') {
-                content.innerHTML = getKelasPage();
-            } else if(page === 'presensi') {
-                content.innerHTML = getPresensiLogPage();
-            }
-        }
-
-        function getDosenDashboard() {
-            const d = state.dashboardData;
-            return `<div class="max-w-6xl mx-auto space-y-6 fade-in">
-                <div class="bg-gradient-to-r from-blue-700 to-blue-900 rounded-2xl p-8 text-white shadow-lg">
-                    <h2 class="text-3xl font-bold mb-2">Dashboard Dosen</h2>
-                    <p class="opacity-90">${state.currentUser.name}</p>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow">
-                        <h3 class="font-bold text-xl mb-4">Kelas yang Diampu</h3>
-                        ${renderKelasList(d.courses)}
-                    </div>
-                    
-                    <div class="bg-white p-6 rounded-xl shadow">
-                        <h3 class="font-bold text-xl mb-4">Presensi Terbaru</h3>
-                        ${renderLogPresensi(d.logs.slice(0, 5))}
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        function getKelasPage() {
-            const d = state.dashboardData;
-            return `<div class="max-w-4xl mx-auto fade-in">
-                <h2 class="text-2xl font-bold mb-6">Kelas yang Diampu</h2>
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    ${renderKelasList(d.courses, true)}
-                </div>
-            </div>`;
-        }
-
-        function getPresensiLogPage() {
-            const d = state.dashboardData;
-            return `<div class="max-w-6xl mx-auto fade-in">
-                <h2 class="text-2xl font-bold mb-6">Log Presensi Mahasiswa</h2>
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 border-b-2">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Mahasiswa</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Mata Kuliah</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase">Waktu</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            ${renderPresensiTable(d.logs)}
-                        </tbody>
-                    </table>
-                </div>
-            </div>`;
-        }
-
-        function renderKelasList(courses, detailed = false) {
-            if(!courses || courses.length === 0) {
-                return '<p class="text-gray-500 text-center py-8">Tidak ada kelas yang diampu</p>';
-            }
-            
-            return courses.map(c => `
-                <div class="border border-gray-200 rounded-lg p-4 mb-3 hover:border-blue-500 transition">
-                    <h4 class="font-bold text-lg">${c.name}</h4>
-                    <p class="text-sm text-gray-500">${c.code} • ${c.sks} SKS • Semester ${c.semester}</p>
-                    <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                        <span><i data-lucide="calendar" class="w-4 h-4 inline"></i> ${c.day}</span>
-                        <span><i data-lucide="clock" class="w-4 h-4 inline"></i> ${c.time_start} - ${c.time_end}</span>
-                        <span><i data-lucide="map-pin" class="w-4 h-4 inline"></i> ${c.room}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderLogPresensi(logs, limit = 5) {
-            if(!logs || logs.length === 0) {
-                return '<p class="text-gray-500 text-center py-8">Belum ada presensi hari ini</p>';
-            }
-            
-            return logs.slice(0, limit).map(log => `
-                <div class="border-b py-3 last:border-b-0">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="font-semibold">${log.mhs_name}</p>
-                            <p class="text-sm text-gray-500">${log.course_name}</p>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            ${renderScheduleList(data.schedule, true)}
                         </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-bold ${log.status === 'Hadir' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${log.status}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderPresensiTable(logs) {
-            if(!logs || logs.length === 0) {
-                return '<tr><td colspan="5" class="text-center py-8 text-gray-500">Belum ada data presensi</td></tr>';
+                    </div>`;
             }
-            
-            return logs.map(log => {
-                let statusClass = 'bg-green-100 text-green-700';
-                if(log.status === 'Sakit') statusClass = 'bg-yellow-100 text-yellow-700';
-                if(log.status === 'Izin') statusClass = 'bg-blue-100 text-blue-700';
-                
-                return `<tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4">${log.mhs_name}</td>
-                    <td class="px-6 py-4">${log.course_name}</td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-bold ${statusClass}">${log.status}</span></td>
-                    <td class="px-6 py-4">${log.date}</td>
-                    <td class="px-6 py-4">${log.timestamp}</td>
-                </tr>`;
-            }).join('');
-        }
-
-        // ============= ADMIN PAGES =============
-        function renderAdminPage() {
-            const page = state.currentPage;
-            const content = document.getElementById('main-content');
-            
-            if(page === 'dashboard') {
-                content.innerHTML = getAdminDashboard();
-            } else if(page === 'sanggah') {
-                content.innerHTML = getSanggahAdminPage();
+            else if (page === 'tugas') {
+                content.innerHTML = `
+                    <div class="max-w-4xl mx-auto fade-in">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Tugas & Assignment</h2>
+                            <p class="text-gray-500 text-sm">Upload tugas sebelum tenggat waktu berakhir.</p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            ${renderTaskList(data.tasks, true)}
+                        </div>
+                    </div>`;
             }
-        }
-
-        function getAdminDashboard() {
-            const d = state.dashboardData;
-            return `<div class="max-w-6xl mx-auto space-y-6 fade-in">
-                <div class="bg-gradient-to-r from-purple-700 to-purple-900 rounded-2xl p-8 text-white shadow-lg">
-                    <h2 class="text-3xl font-bold mb-2">Dashboard Admin</h2>
-                    <p class="opacity-90">Manajemen Sistem SEMAR</p>
-                </div>
-
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow text-center">
-                        <i data-lucide="users" class="w-12 h-12 mx-auto text-blue-600 mb-2"></i>
-                        <p class="text-3xl font-bold text-gray-800">150</p>
-                        <p class="text-sm text-gray-500">Total Mahasiswa</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow text-center">
-                        <i data-lucide="file-question" class="w-12 h-12 mx-auto text-yellow-600 mb-2"></i>
-                        <p class="text-3xl font-bold text-gray-800">${d.appeals.filter(a => a.status === 'Menunggu').length}</p>
-                        <p class="text-sm text-gray-500">Sanggah Menunggu</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow text-center">
-                        <i data-lucide="check-circle" class="w-12 h-12 mx-auto text-green-600 mb-2"></i>
-                        <p class="text-3xl font-bold text-gray-800">${d.appeals.filter(a => a.status === 'Disetujui').length}</p>
-                        <p class="text-sm text-gray-500">Sanggah Disetujui</p>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="font-bold text-xl mb-4">Sanggah UKT Terbaru</h3>
-                    ${renderSanggahAdmin(d.appeals.slice(0, 10))}
-                </div>
-            </div>`;
-        }
-
-        function getSanggahAdminPage() {
-            const d = state.dashboardData;
-            return `<div class="max-w-6xl mx-auto fade-in">
-                <h2 class="text-2xl font-bold mb-6">Manajemen Sanggah UKT</h2>
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    ${renderSanggahAdmin(d.appeals, true)}
-                </div>
-            </div>`;
-        }
-
-        function renderSanggahAdmin(appeals, showActions = true) {
-            if(!appeals || appeals.length === 0) {
-                return '<p class="text-gray-500 text-center py-8">Tidak ada pengajuan sanggahan</p>';
-            }
-            
-            return `<div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 border-b-2">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Mahasiswa</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">NIM</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Alasan</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Tanggal</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Status</th>
-                            ${showActions ? '<th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Aksi</th>' : ''}
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y">
-                        ${appeals.map(a => {
-                            let statusClass = 'bg-yellow-100 text-yellow-700';
-                            if(a.status === 'Disetujui') statusClass = 'bg-green-100 text-green-700';
-                            if(a.status === 'Ditolak') statusClass = 'bg-red-100 text-red-700';
+            else if (page === 'ukt') {
+                content.innerHTML = `
+                    <div class="max-w-4xl mx-auto fade-in">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Layanan Keuangan (UKT)</h2>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                <h3 class="font-bold text-lg mb-4 text-gray-800">Ajukan Sanggah Banding UKT</h3>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                                    <p class="text-sm text-yellow-700">Pastikan Anda memiliki alasan yang kuat dan bukti pendukung sebelum mengajukan sanggahan.</p>
+                                </div>
+                                <div class="flex flex-col gap-3">
+                                    <textarea id="ukt-alasan" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition" placeholder="Tuliskan alasan lengkap pengajuan sanggahan Anda di sini..."></textarea>
+                                    <button onclick="performAction('sanggah_ukt')" class="self-end bg-primary text-white px-6 py-2.5 rounded-lg font-bold hover:bg-primaryDark transition shadow-lg shadow-green-100 flex items-center gap-2">
+                                        <i data-lucide="send" class="w-4 h-4"></i> Kirim Pengajuan
+                                    </button>
+                                </div>
+                            </div>
                             
-                            return `<tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3">${a.name}</td>
-                                <td class="px-4 py-3">${a.nim}</td>
-                                <td class="px-4 py-3 max-w-xs truncate">${a.description}</td>
-                                <td class="px-4 py-3">${a.request_date}</td>
-                                <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${statusClass}">${a.status}</span></td>
-                                ${showActions && a.status === 'Menunggu' ? `
-                                    <td class="px-4 py-3">
-                                        <div class="flex gap-2">
-                                            <button onclick="updateSanggah(${a.id}, 'Disetujui')" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">Setuju</button>
-                                            <button onclick="updateSanggah(${a.id}, 'Ditolak')" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700">Tolak</button>
-                                        </div>
-                                    </td>
-                                ` : showActions ? '<td class="px-4 py-3 text-gray-400 text-xs">Selesai</td>' : ''}
-                            </tr>`;
-                        }).join('')}
-                    </tbody>
-                </table>
+                            <div class="bg-blue-50 rounded-xl p-6 border border-blue-100">
+                                <h3 class="font-bold text-blue-900 mb-2">Tagihan Anda</h3>
+                                <p class="text-sm text-blue-700 mb-4">UKT Golongan V</p>
+                                <p class="text-3xl font-bold text-blue-900 mb-2">Rp 4.500.000</p>
+                                <span class="bg-green-200 text-green-800 px-2 py-1 rounded text-xs font-bold">LUNAS</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                                <h3 class="font-bold text-gray-700">Riwayat Pengajuan</h3>
+                            </div>
+                            <div class="p-6">
+                                ${renderAppealHistory(data.appeals)}
+                            </div>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // ==========================================
+        // DOSEN PAGES RENDERER
+        // ==========================================
+        function renderDosenPages(page) {
+            const content = document.getElementById('main-content');
+            const data = state.dashboardData || { courses: [], logs: [], tasks: [] };
+
+            if (page === 'dashboard') {
+                content.innerHTML = `
+                    <div class="max-w-6xl mx-auto space-y-6 fade-in">
+                        <div class="bg-gradient-to-r from-blue-700 to-indigo-900 rounded-2xl p-8 text-white shadow-xl">
+                            <h2 class="text-3xl font-bold mb-2">Selamat Datang, Dosen!</h2>
+                            <p class="opacity-90 text-blue-100">${state.currentUser.name} • NIP. ${state.currentUser.username}</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-5 h-5 text-blue-600"></i> Kelas Hari Ini
+                                </h3>
+                                ${renderClassList(data.courses.slice(0, 3))}
+                            </div>
+                            
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                    <i data-lucide="clock" class="w-5 h-5 text-green-600"></i> Aktivitas Presensi Terkini
+                                </h3>
+                                ${renderPresenceLogCompact(data.logs.slice(0, 5))}
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            else if (page === 'kelas') {
+                content.innerHTML = `
+                    <div class="max-w-5xl mx-auto fade-in">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Daftar Kelas Ajar</h2>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            ${renderClassList(data.courses, true)}
+                        </div>
+                    </div>`;
+            }
+            else if (page === 'presensi') {
+                content.innerHTML = `
+                    <div class="max-w-6xl mx-auto fade-in">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Rekapitulasi Kehadiran</h2>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="table-header">Mahasiswa</th>
+                                            <th class="table-header">Mata Kuliah</th>
+                                            <th class="table-header">Waktu Presensi</th>
+                                            <th class="table-header">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        ${renderPresenceLogTable(data.logs)}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            else if (page === 'tugas_dosen') {
+                content.innerHTML = `
+                     <div class="max-w-5xl mx-auto fade-in">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Manajemen Tugas</h2>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+                            <h3 class="font-bold text-lg mb-4 text-gray-800">Buat Tugas Baru</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Mata Kuliah</label>
+                                    <select id="task-course" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary">
+                                        <option value="">-- Pilih Mata Kuliah --</option>
+                                        ${(data.courses || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tenggat Waktu</label>
+                                    <input type="datetime-local" id="task-deadline" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Judul Tugas</label>
+                                <input type="text" id="task-title" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary" placeholder="Contoh: Laporan Praktikum Modul 1">
+                            </div>
+                            <button onclick="performAction('create_task')" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition w-full md:w-auto">
+                                <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i> Publikasikan Tugas
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h3 class="font-bold text-lg mb-4 text-gray-800">Daftar Tugas Aktif</h3>
+                             ${renderDosenTaskList(data.tasks || [])}
+                        </div>
+                     </div>`;
+            }
+        }
+
+        // ==========================================
+        // ADMIN PAGES RENDERER
+        // ==========================================
+        function renderAdminPages(page) {
+            const content = document.getElementById('main-content');
+            const data = state.dashboardData || { appeals: [], users: [] };
+
+            if (page === 'dashboard') {
+                const waitingCount = data.appeals.filter(a => a.status === 'Menunggu').length;
+                const approvedCount = data.appeals.filter(a => a.status === 'Disetujui').length;
+
+                content.innerHTML = `
+                    <div class="max-w-6xl mx-auto space-y-6 fade-in">
+                        <div class="bg-gradient-to-r from-purple-700 to-indigo-900 rounded-2xl p-8 text-white shadow-xl">
+                            <h2 class="text-3xl font-bold mb-2">Panel Admin</h2>
+                            <p class="opacity-90">Sistem Informasi Akademik Terpadu</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center justify-center">
+                                <div class="bg-blue-100 p-3 rounded-full mb-3"><i data-lucide="users" class="w-6 h-6 text-blue-600"></i></div>
+                                <span class="text-3xl font-bold text-gray-800">1,240</span>
+                                <span class="text-sm text-gray-500">Total User Aktif</span>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center justify-center">
+                                <div class="bg-yellow-100 p-3 rounded-full mb-3"><i data-lucide="alert-circle" class="w-6 h-6 text-yellow-600"></i></div>
+                                <span class="text-3xl font-bold text-gray-800">${waitingCount}</span>
+                                <span class="text-sm text-gray-500">Menunggu Verifikasi</span>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center justify-center">
+                                <div class="bg-green-100 p-3 rounded-full mb-3"><i data-lucide="check-square" class="w-6 h-6 text-green-600"></i></div>
+                                <span class="text-3xl font-bold text-gray-800">${approvedCount}</span>
+                                <span class="text-sm text-gray-500">Sanggahan Disetujui</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                                <h3 class="font-bold text-gray-700">Antrean Sanggah UKT</h3>
+                                <button onclick="navigateTo('sanggah')" class="text-sm text-purple-600 font-bold hover:underline">Lihat Semua</button>
+                            </div>
+                            ${renderAppealTable(data.appeals.slice(0, 5), true)}
+                        </div>
+                    </div>`;
+            }
+            else if (page === 'sanggah') {
+                content.innerHTML = `
+                    <div class="max-w-6xl mx-auto fade-in">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Manajemen Sanggah UKT</h2>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                             ${renderAppealTable(data.appeals, true)}
+                        </div>
+                    </div>`;
+            }
+            else if (page === 'users') {
+                content.innerHTML = `
+                    <div class="max-w-6xl mx-auto fade-in">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Data Pengguna</h2>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center py-12">
+                            <i data-lucide="database" class="w-16 h-16 text-gray-300 mb-4"></i>
+                            <h3 class="text-lg font-bold text-gray-600">Fitur dalam pengembangan</h3>
+                            <p class="text-gray-400">Modul manajemen user akan segera tersedia.</p>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // ==========================================
+        // COMPONENT RENDERERS (HELPERS)
+        // ==========================================
+        
+        // --- Mahasiswa Components ---
+        function renderScheduleList(schedule, showAll = false) {
+            if (!schedule || schedule.length === 0) {
+                return `<div class="text-center py-8 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                    <i data-lucide="calendar-off" class="w-8 h-8 mx-auto mb-2"></i>
+                    <p class="text-sm">Tidak ada jadwal kuliah.</p>
+                </div>`;
+            }
+
+            return `<div class="space-y-4">
+                ${schedule.map(c => {
+                    const isPresent = parseInt(c.is_present) > 0;
+                    const cardClass = "border border-gray-200 rounded-xl p-4 transition hover:shadow-md hover:border-primary/30 bg-white";
+                    
+                    let buttonHtml = '';
+                    if (isPresent) {
+                        buttonHtml = `
+                        <button disabled class="w-full mt-3 py-2 bg-green-50 text-green-700 rounded-lg text-sm font-bold flex items-center justify-center gap-2 cursor-not-allowed border border-green-100">
+                            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                            Hadir (${c.present_time || 'Tercatat'})
+                        </button>`;
+                    } else {
+                        buttonHtml = `
+                        <button onclick="performAction('presensi', ${c.id})" class="w-full mt-3 py-2 bg-primary text-white rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-primaryDark transition shadow-sm">
+                            <i data-lucide="fingerprint" class="w-4 h-4"></i>
+                            Rekam Kehadiran
+                        </button>`;
+                    }
+
+                    return `
+                    <div class="${cardClass}">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-lg">${c.name}</h4>
+                                <div class="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                                    <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-mono">${c.code}</span>
+                                    <span>•</span>
+                                    <span>${c.sks} SKS</span>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold shadow-sm whitespace-nowrap">
+                                ${c.time_start} - ${c.time_end}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-4 text-sm text-gray-600 mt-3 bg-gray-50 p-2 rounded-lg">
+                            <div class="flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-accent"></i>
+                                <span class="font-medium">${c.room}</span>
+                            </div>
+                            <div class="h-4 w-px bg-gray-300"></div>
+                            <div class="flex items-center gap-1.5">
+                                <i data-lucide="user" class="w-4 h-4 text-gray-400"></i>
+                                <span class="truncate max-w-[150px]">Dosen Pengampu</span>
+                            </div>
+                        </div>
+                        ${buttonHtml}
+                    </div>`;
+                }).join('')}
             </div>`;
         }
 
-        async function updateSanggah(id, status) {
-            if(!confirm(`Yakin ingin ${status === 'Disetujui' ? 'menyetujui' : 'menolak'} sanggahan ini?`)) return;
-            
-            const fd = new FormData();
-            fd.append('id', id);
-            fd.append('status', status);
-            
-            try {
-                const res = await fetch(API_URL + 'action_admin.php', {method: 'POST', body: fd});
-                const d = await res.json();
-                showToast(d.status === 'success' ? 'Sukses' : 'Gagal', d.message, d.status !== 'success');
-                
-                if(d.status === 'success') {
-                    await loadData();
-                    renderPage();
-                }
-            } catch(e) {
-                showToast('Error', 'Gagal memproses', true);
+        function renderTaskList(tasks, showAll = false) {
+            if (!tasks || tasks.length === 0) {
+                return `<div class="text-center py-8 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                    <i data-lucide="check-square" class="w-8 h-8 mx-auto mb-2"></i>
+                    <p class="text-sm">Tidak ada tugas aktif.</p>
+                </div>`;
             }
+
+            return `<div class="space-y-4">
+                ${tasks.map(t => {
+                    const isSubmitted = t.submitted_at != null;
+                    const deadlineDate = new Date(t.deadline);
+                    const isOverdue = new Date() > deadlineDate;
+                    
+                    const statusConfig = isSubmitted 
+                        ? { color: 'green', text: 'Terkirim', icon: 'check-circle' }
+                        : isOverdue 
+                            ? { color: 'red', text: 'Terlambat', icon: 'alert-circle' }
+                            : { color: 'yellow', text: 'Belum Kumpul', icon: 'clock' };
+
+                    return `
+                    <div class="border border-gray-200 rounded-xl p-4 bg-white hover:border-blue-300 transition relative overflow-hidden group">
+                        ${isOverdue && !isSubmitted ? '<div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>' : ''}
+                        
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-gray-800">${t.title}</h4>
+                            <span class="px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1 bg-${statusConfig.color}-100 text-${statusConfig.color}-700">
+                                <i data-lucide="${statusConfig.icon}" class="w-3 h-3"></i> ${statusConfig.text}
+                            </span>
+                        </div>
+                        
+                        <p class="text-xs text-gray-500 mb-3 uppercase tracking-wide font-semibold">${t.course_name || 'Mata Kuliah Umum'}</p>
+                        
+                        <div class="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                            <i data-lucide="calendar" class="w-4 h-4 text-gray-400"></i>
+                            <span>Deadline: <span class="font-medium ${isOverdue ? 'text-red-600' : ''}">${deadlineDate.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</span></span>
+                        </div>
+
+                        ${!isSubmitted ? `
+                        <form onsubmit="performUpload(event, ${t.id})" class="flex gap-2">
+                            <label class="flex-1 cursor-pointer">
+                                <div class="w-full border border-dashed border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-500 flex items-center justify-center hover:bg-gray-50 transition h-full">
+                                    <span class="file-name-placeholder">Pilih File...</span>
+                                    <input type="file" required class="hidden" onchange="this.parentElement.querySelector('.file-name-placeholder').innerText = this.files[0].name">
+                                </div>
+                            </label>
+                            <button type="submit" class="bg-blue-600 text-white px-4 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm">
+                                Upload
+                            </button>
+                        </form>
+                        ` : `
+                        <div class="bg-green-50 text-green-700 text-xs p-2 rounded border border-green-100 flex items-center gap-2">
+                            <i data-lucide="file-check" class="w-4 h-4"></i>
+                            File berhasil diunggah pada ${new Date(t.submitted_at).toLocaleDateString('id-ID')}
+                        </div>
+                        `}
+                    </div>`;
+                }).join('')}
+            </div>`;
         }
 
-        // ============= ACTIONS =============
-        async function doAction(type, id = null) {
-            const fd = new FormData();
-            fd.append('action', type);
+        function renderAppealHistory(appeals) {
+            if (!appeals || appeals.length === 0) return '<p class="text-gray-500 text-sm italic">Belum ada riwayat pengajuan.</p>';
             
-            if(type === 'presensi') {
-                fd.append('course_id', id);
-            } else if(type === 'sanggah_ukt') {
-                const val = document.getElementById('ukt-alasan').value.trim();
-                if(!val) return showToast('Error', 'Isi alasan sanggahan!', true);
-                fd.append('desc', val);
+            return `<div class="space-y-0 divide-y divide-gray-100">
+                ${appeals.map(a => {
+                    let statusBadge = '';
+                    if (a.status === 'Disetujui') statusBadge = '<span class="badge bg-green-100 text-green-800">Disetujui</span>';
+                    else if (a.status === 'Ditolak') statusBadge = '<span class="badge bg-red-100 text-red-800">Ditolak</span>';
+                    else statusBadge = '<span class="badge bg-yellow-100 text-yellow-800">Menunggu</span>';
+
+                    return `
+                    <div class="py-4 hover:bg-gray-50 transition px-2 -mx-2 rounded">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-xs text-gray-400 font-mono">${a.request_date}</span>
+                            ${statusBadge}
+                        </div>
+                        <p class="text-gray-800 text-sm font-medium line-clamp-2">${a.description}</p>
+                    </div>`;
+                }).join('')}
+            </div>`;
+        }
+
+        // --- Dosen Components ---
+        function renderClassList(courses, detailed = false) {
+            if (!courses || courses.length === 0) return '<div class="text-gray-500 text-center py-4 bg-gray-50 rounded-lg">Tidak ada jadwal kelas.</div>';
+            
+            return `<div class="grid gap-4 ${detailed ? 'md:grid-cols-2' : ''}">
+                ${courses.map(c => `
+                <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition hover:border-blue-400 group relative">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="bg-blue-50 text-blue-700 p-2 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition">
+                            <i data-lucide="book" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">${c.code}</span>
+                    </div>
+                    <h4 class="font-bold text-gray-800 text-lg mb-1">${c.name}</h4>
+                    <p class="text-sm text-gray-500 mb-4">Semester ${c.semester} • ${c.sks} SKS</p>
+                    
+                    <div class="flex items-center gap-4 text-sm text-gray-600 border-t border-gray-100 pt-3">
+                        <div class="flex items-center gap-1.5">
+                            <i data-lucide="clock" class="w-4 h-4 text-primary"></i>
+                            <span class="font-medium">${c.time_start} - ${c.time_end}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-accent"></i>
+                            <span>${c.room}</span>
+                        </div>
+                    </div>
+                    ${detailed ? '<div class="mt-4 pt-2"><button class="w-full py-2 border border-blue-600 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-50">Lihat Peserta</button></div>' : ''}
+                </div>`).join('')}
+            </div>`;
+        }
+
+        function renderPresenceLogCompact(logs) {
+            if (!logs || logs.length === 0) return '<p class="text-gray-500 text-sm">Belum ada aktivitas.</p>';
+            return `<div class="space-y-3">
+                ${logs.map(l => `
+                <div class="flex items-center justify-between border-b border-gray-50 pb-2 last:border-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                            ${l.mhs_name.charAt(0)}
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">${l.mhs_name}</p>
+                            <p class="text-xs text-gray-500 truncate max-w-[150px]">${l.course_name}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-bold text-green-600 block">${l.timestamp}</span>
+                        <span class="text-[10px] text-gray-400">${l.status}</span>
+                    </div>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        function renderPresenceLogTable(logs) {
+            if (!logs || logs.length === 0) return '<tr><td colspan="4" class="p-8 text-center text-gray-500">Data Kosong</td></tr>';
+            return logs.map(l => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="table-cell font-medium text-gray-900">${l.mhs_name}</td>
+                    <td class="table-cell">${l.course_name}</td>
+                    <td class="table-cell text-gray-500 font-mono text-xs">${l.date} <span class="text-gray-900 font-bold">${l.timestamp}</span></td>
+                    <td class="table-cell">
+                        <span class="badge ${l.status === 'Hadir' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${l.status}
+                        </span>
+                    </td>
+                </tr>`).join('');
+        }
+
+        function renderDosenTaskList(tasks) {
+            if(!tasks || tasks.length === 0) return '<p class="text-gray-500 text-center py-4 italic">Belum ada tugas yang dibuat.</p>';
+            return tasks.map(t => `
+                <div class="flex justify-between items-center border-b border-gray-100 py-3 last:border-0">
+                    <div>
+                        <p class="font-bold text-gray-800">${t.title}</p>
+                        <p class="text-xs text-gray-500">${t.course_name} • Deadline: ${t.deadline}</p>
+                    </div>
+                    <button class="text-xs text-red-500 hover:text-red-700 font-bold">Hapus</button>
+                </div>
+            `).join('');
+        }
+
+        // --- Admin Components ---
+        function renderAppealTable(appeals, showActions) {
+            if (!appeals || appeals.length === 0) return '<div class="p-8 text-center text-gray-500 bg-gray-50">Tidak ada data pengajuan.</div>';
+            
+            return `<table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="table-header">Mahasiswa</th>
+                        <th class="table-header">Keterangan</th>
+                        <th class="table-header">Status</th>
+                        ${showActions ? '<th class="table-header text-right">Aksi</th>' : ''}
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    ${appeals.map(a => `
+                    <tr>
+                        <td class="table-cell">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-gray-900">${a.name}</span>
+                                <span class="text-xs text-gray-500">${a.nim}</span>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                            <p class="truncate max-w-xs" title="${a.description}">${a.description}</p>
+                            <span class="text-xs text-gray-400">${a.request_date}</span>
+                        </td>
+                        <td class="table-cell">
+                            <span class="badge ${a.status === 'Menunggu' ? 'bg-yellow-100 text-yellow-800' : a.status === 'Disetujui' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${a.status}
+                            </span>
+                        </td>
+                        ${showActions ? `
+                        <td class="table-cell text-right">
+                            ${a.status === 'Menunggu' ? `
+                            <div class="flex justify-end gap-2">
+                                <button onclick="performAction('approve_appeal', ${a.id}, 'Disetujui')" class="p-1.5 bg-green-100 text-green-600 rounded hover:bg-green-200" title="Terima">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="performAction('approve_appeal', ${a.id}, 'Ditolak')" class="p-1.5 bg-red-100 text-red-600 rounded hover:bg-red-200" title="Tolak">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>` : '<span class="text-xs text-gray-400 italic">Selesai</span>'}
+                        </td>` : ''}
+                    </tr>`).join('')}
+                </tbody>
+            </table>`;
+        }
+
+        // ==========================================
+        // ACTION HANDLERS
+        // ==========================================
+        async function performAction(actionType, id = null, extraData = null) {
+            // Confirm sensitive actions
+            if (actionType === 'approve_appeal' && !confirm(`Ubah status menjadi ${extraData}?`)) return;
+
+            // Prepare Payload
+            const formData = new FormData();
+            formData.append('action', actionType);
+            if (id) formData.append('id', id);
+
+            if (actionType === 'sanggah_ukt') {
+                const reason = document.getElementById('ukt-alasan').value.trim();
+                if (!reason) return showToast('Error', 'Mohon isi alasan sanggahan.', true);
+                formData.append('desc', reason);
+            }
+            else if (actionType === 'approve_appeal') {
+                formData.append('status', extraData);
+            }
+            else if (actionType === 'presensi') {
+                formData.append('course_id', id);
+            }
+            else if (actionType === 'create_task') {
+                const courseId = document.getElementById('task-course').value;
+                const title = document.getElementById('task-title').value;
+                const deadline = document.getElementById('task-deadline').value;
+
+                if(!courseId || !title || !deadline) return showToast('Validasi', 'Mohon lengkapi semua field', true);
+
+                formData.append('course_id', courseId);
+                formData.append('title', title);
+                formData.append('deadline', deadline);
             }
 
+            // Determine Endpoint
+            let endpoint = 'action_mhs.php'; // Default
+            if (['approve_appeal'].includes(actionType)) endpoint = 'action_admin.php';
+            if (['create_task'].includes(actionType)) endpoint = 'action_dosen.php';
+
             try {
-                const res = await fetch(API_URL + 'action_mhs.php', {method: 'POST', body: fd});
-                const d = await res.json();
-                showToast(d.status === 'success' ? 'Sukses' : 'Gagal', d.message, d.status !== 'success');
-                
-                if(d.status === 'success') {
-                    if(type === 'sanggah_ukt') document.getElementById('ukt-alasan').value = '';
-                    await loadData();
-                    renderPage();
+                const btnLoading = document.activeElement;
+                if(btnLoading) {
+                    btnLoading.disabled = true; 
+                    btnLoading.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>';
+                    lucide.createIcons();
                 }
-            } catch(e) {
+
+                const res = await fetch(API_URL + endpoint, { method: 'POST', body: formData });
+                const json = await res.json();
+
+                if (json.status === 'success') {
+                    showToast('Berhasil', json.message);
+                    
+                    // Clear Forms if needed
+                    if(actionType === 'sanggah_ukt') document.getElementById('ukt-alasan').value = '';
+                    if(actionType === 'create_task') {
+                        document.getElementById('task-title').value = '';
+                        document.getElementById('task-deadline').value = '';
+                    }
+
+                    // Refresh Data
+                    await loadDashboardData();
+                    // Re-render current page
+                    navigateTo(state.currentPage);
+                } else {
+                    showToast('Gagal', json.message, true);
+                    if(btnLoading) { btnLoading.disabled = false; btnLoading.innerText = 'Coba Lagi'; }
+                }
+            } catch (e) {
                 console.error(e);
-                showToast('Error', 'Gagal memproses', true);
+                showToast('Error', 'Terjadi kesalahan sistem.', true);
             }
         }
 
-        async function doUpload(e, id) {
+        async function performUpload(e, taskId) {
             e.preventDefault();
-            const file = e.target.querySelector('input[type="file"]').files[0];
-            if(!file) return showToast('Error', 'Pilih file!', true);
+            const fileInput = e.target.querySelector('input[type="file"]');
+            const file = fileInput.files[0];
             
-            const fd = new FormData();
-            fd.append('action', 'upload_tugas');
-            fd.append('assignment_id', id);
-            fd.append('file', file);
+            if (!file) return showToast('Error', 'Pilih file terlebih dahulu!', true);
+
+            const formData = new FormData();
+            formData.append('action', 'upload_tugas');
+            formData.append('assignment_id', taskId);
+            formData.append('file', file);
+
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerHTML = 'Uploading...';
+            btn.disabled = true;
 
             try {
-                const btn = e.target.querySelector('button');
-                btn.disabled = true;
-                btn.innerText = 'Uploading...';
-                
-                const res = await fetch(API_URL + 'action_mhs.php', {method: 'POST', body: fd});
-                const d = await res.json();
-                showToast(d.status === 'success' ? 'Sukses' : 'Gagal', d.message, d.status !== 'success');
-                
-                if(d.status === 'success') {
-                    await loadData();
-                    renderPage();
+                const res = await fetch(API_URL + 'action_mhs.php', { method: 'POST', body: formData });
+                const json = await res.json();
+
+                if (json.status === 'success') {
+                    showToast('Upload Berhasil', json.message);
+                    await loadDashboardData();
+                    navigateTo(state.currentPage);
+                } else {
+                    showToast('Upload Gagal', json.message, true);
                 }
-                
-                btn.disabled = false;
-                btn.innerText = 'Upload';
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
-                showToast('Error', 'Gagal upload', true);
+                showToast('Error', 'Gagal mengunggah file.', true);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         }
 
-        // ============= UTILS =============
-        function showToast(title, msg, err = false) {
-            const t = document.getElementById('toast');
+        // ==========================================
+        // UTILITIES
+        // ==========================================
+        let toastTimeout;
+        function showToast(title, msg, isError = false) {
+            const toast = document.getElementById('toast');
             document.getElementById('toast-title').innerText = title;
             document.getElementById('toast-msg').innerText = msg;
             
-            t.className = `fixed top-5 right-5 border-l-4 px-6 py-4 rounded-lg shadow-2xl transform transition-transform duration-300 z-[60] flex items-center gap-4 min-w-[300px] bg-white ${err ? 'border-red-500' : 'border-primary'} translate-x-0`;
+            // Icon Styling
+            const iconContainer = document.getElementById('toast-icon');
+            iconContainer.className = isError ? 'text-red-500' : 'text-primary';
+            iconContainer.innerHTML = isError 
+                ? '<i data-lucide="alert-circle" class="w-6 h-6"></i>' 
+                : '<i data-lucide="check-circle" class="w-6 h-6"></i>';
             
-            document.getElementById('toast-icon').innerHTML = `<i data-lucide="${err ? 'alert-circle' : 'check-circle'}" class="w-6 h-6 ${err ? 'text-red-500' : 'text-primary'}"></i>`;
+            // Border Styling
+            toast.className = `fixed top-5 right-5 bg-white border-l-4 px-6 py-4 rounded-lg shadow-2xl transform transition-transform duration-300 z-[60] flex items-center gap-4 min-w-[320px] translate-x-0 ${isError ? 'border-red-500' : 'border-primary'}`;
             
             lucide.createIcons();
             
-            setTimeout(() => {
-                t.classList.add('translate-x-full');
-            }, 3000);
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(hideToast, 4000);
+        }
+
+        function hideToast() {
+            document.getElementById('toast').classList.add('translate-x-full');
         }
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
-            
             sidebar.classList.toggle('-translate-x-full');
             overlay.classList.toggle('hidden');
         }
 
-        // Init
+        // Initial Load
         lucide.createIcons();
     </script>
 </body>

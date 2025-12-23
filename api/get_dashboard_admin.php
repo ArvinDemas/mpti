@@ -1,10 +1,32 @@
 <?php
-include 'db.php';
-if($_SESSION['user']['role'] != 'admin') exit;
+require_once 'db.php';
 
-$q = $conn->prepare("SELECT a.*, u.name, u.username as nim FROM ukt_appeals a JOIN users u ON a.student_id = u.id ORDER BY status DESC");
-$q->execute();
-$appeals = $q->fetchAll(PDO::FETCH_ASSOC);
+if(!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'admin') {
+    echo json_encode(["status" => "error", "message" => "Unauthorized"]);
+    exit;
+}
 
-echo json_encode(["status"=>"success", "data"=>["appeals"=>$appeals]]);
-?>
+// Ambil semua sanggah UKT
+$appeals = [];
+$sql = "SELECT a.*, u.name, u.username as nim 
+        FROM ukt_appeals a 
+        JOIN users u ON a.student_id = u.id 
+        ORDER BY 
+            CASE a.status 
+                WHEN 'Menunggu' THEN 1 
+                WHEN 'Disetujui' THEN 2 
+                WHEN 'Ditolak' THEN 3 
+            END,
+            a.request_date DESC";
+
+$result = $conn->query($sql);
+if($result) {
+    while($row = $result->fetch_assoc()) {
+        $appeals[] = $row;
+    }
+}
+
+echo json_encode([
+    "status" => "success", 
+    "data" => ["appeals" => $appeals]
+]);
